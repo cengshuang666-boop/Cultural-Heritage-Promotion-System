@@ -46,6 +46,10 @@
     .btn-secondary { background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border); }
     .btn-sm { padding:5px 12px; font-size:12px; }
 
+    .id-selector { padding:8px 14px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none; cursor:pointer; min-width:260px; }
+    .id-selector:focus { border-color:var(--accent); }
+    .id-selector option { background:var(--bg-card); color:var(--text-primary); }
+
     .score-cards { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:20px; }
     .score-card { background:var(--bg-hover); border-radius:10px; padding:20px; text-align:center; border:2px solid transparent; transition:.2s; }
     .score-card:hover { border-color:var(--accent); transform:translateY(-2px); }
@@ -95,7 +99,7 @@
       <div class="logo-icon">🏛</div>
       文博AI宣传视频平台
     </div>
-        <nav class="topnav">
+    <nav class="topnav">
       <a href="index.html">首页</a>
       <a href="video.html">视频生成</a>
       <a href="audio.html">音频合成</a>
@@ -118,7 +122,7 @@
       工作台
     </a>
   </div>
-    <div class="sidebar-group">
+  <div class="sidebar-group">
     <a href="video.html" class="sidebar-item">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.5 2.5a.5.5 0 00-1 0v5.793L5.354 6.146a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 8.293V2.5z"/><path d="M3.5 9.5a.5.5 0 00-1 0v3A1.5 1.5 0 004 14h8a1.5 1.5 0 001.5-1.5v-3a.5.5 0 00-1 0v3a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5v-3a.5.5 0 00-.5-.5z"/></svg>
       视频生成
@@ -152,27 +156,32 @@
     <p class="page-desc">对AI生成的视频、音频、字幕进行多维度质量评分与可视化分析</p>
 
     <div class="panel">
-      <div class="panel-title">📊 综合质量评分 - WB-20250708-006</div>
+      <div class="panel-title" style="flex-wrap:wrap; gap:12px;">
+        <span id="scoreTitle">📊 综合质量评分</span>
+        <select class="id-selector" id="contentSelect" onchange="switchContent(this.value)">
+          <option value="">选择内容查看质量报告...</option>
+        </select>
+      </div>
       <div class="score-cards">
         <div class="score-card">
           <div class="score-value excellent" id="scoreOverall">92</div>
           <div class="score-label">综合评分</div>
-          <div class="score-detail">优秀</div>
+          <div class="score-detail" id="labelOverall">优秀</div>
         </div>
         <div class="score-card">
           <div class="score-value good" id="scoreVisual">87</div>
           <div class="score-label">画面质量</div>
-          <div class="score-detail">渲染精细 · 色彩准确</div>
+          <div class="score-detail" id="labelVisual">渲染精细 · 色彩准确</div>
         </div>
         <div class="score-card">
           <div class="score-value excellent" id="scoreAudio">95</div>
           <div class="score-label">音频质量</div>
-          <div class="score-detail">发音清晰 · 自然流畅</div>
+          <div class="score-detail" id="labelAudio">发音清晰 · 自然流畅</div>
         </div>
         <div class="score-card">
           <div class="score-value good" id="scoreSync">88</div>
           <div class="score-label">同步精度</div>
-          <div class="score-detail">唇形对齐 · 时间准确</div>
+          <div class="score-detail" id="labelSync">唇形对齐 · 时间准确</div>
         </div>
       </div>
       <div class="chart-area">
@@ -186,40 +195,186 @@
         <thead>
           <tr><th>评价维度</th><th>分数</th><th>可视化</th><th>等级</th></tr>
         </thead>
-        <tbody>
-          <tr><td>画面清晰度</td><td>88/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:88%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
-          <tr><td>数字人渲染质量</td><td>90/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:90%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
-          <tr><td>文物还原准确度</td><td>94/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:94%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
-          <tr><td>语音自然度</td><td>96/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:96%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
-          <tr><td>唇形同步精度</td><td>89/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:89%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
-          <tr><td>字幕时间对齐</td><td>91/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:91%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
-          <tr><td>内容历史准确性</td><td>85/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:85%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
-          <tr><td>叙事流畅度</td><td>93/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:93%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
-          <tr><td>背景画面质量</td><td>82/100</td><td><div class="bar-track"><div class="bar-fill yellow" style="width:82%"></div></div></td><td><span class="score-badge badge-yellow">一般</span></td></tr>
-          <tr><td>水印标识合规</td><td>100/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:100%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
+        <tbody id="detailBody">
+          <!-- JS填充 -->
         </tbody>
       </table>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-      <div class="report-card">
-        <div class="report-title">✅ 优势项</div>
-        <div class="report-item"><span class="label">语音自然度</span><span class="value green">96/100</span></div>
-        <div class="report-item"><span class="label">水印合规</span><span class="value green">100/100</span></div>
-        <div class="report-item"><span class="label">文物还原准确度</span><span class="value green">94/100</span></div>
-        <div class="report-item"><span class="label">叙事流畅度</span><span class="value green">93/100</span></div>
-      </div>
-      <div class="report-card">
-        <div class="report-title">⚠️ 待优化项</div>
-        <div class="report-item"><span class="label">背景画面质量</span><span class="value yellow">82/100</span></div>
-        <div class="report-item"><span class="label">画面清晰度</span><span class="value green">88/100</span></div>
-        <div class="report-item"><span class="label">内容历史准确性</span><span class="value green">85/100</span></div>
-      </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;" id="reportArea">
+      <!-- JS填充 -->
     </div>
   </div>
 </main>
 
 <script>
+  // ========== 数据定义 ==========
+  const staticItems = [
+    {id:'WB-20260708-003', title:'宋代书画科普', type:'科普短片'},
+    {id:'WB-20260708-006', title:'汉代玉器鉴赏', type:'文物讲解'},
+    {id:'WB-20260708-007', title:'陶瓷艺术展预告', type:'展览预告'},
+    {id:'WB-20260708-005', title:'唐代瓷器展厅导览', type:'博物馆导览'},
+    {id:'WB-20260708-004', title:'青铜鼎文物讲解', type:'文物讲解'},
+    {id:'WB-20260708-002', title:'明清家具介绍', type:'科普短片'},
+    {id:'WB-20260707-001', title:'历史故事：丝绸之路', type:'历史故事'},
+    {id:'WB-20260707-002', title:'特展预告片', type:'展览预告'},
+  ];
+
+  function getAllItems() {
+    const stored = JSON.parse(localStorage.getItem('wenbo_audit_items') || '[]');
+    const map = new Map();
+    staticItems.forEach(it => map.set(it.id, it));
+    stored.forEach(it => { if (!map.has(it.id)) map.set(it.id, it); });
+    return Array.from(map.values());
+  }
+
+  // ========== 评分引擎 ==========
+  function hashId(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i);
+    return Math.abs(h);
+  }
+  function seededRandom(seed) {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  }
+  function genScore(id, idx) {
+    const base = hashId(id);
+    return Math.floor(75 + seededRandom(base + idx) * 23);
+  }
+  function getScores(id) {
+    return {
+      overall: genScore(id, 0), visual: genScore(id, 1), audio: genScore(id, 2), sync: genScore(id, 3),
+      clarity: genScore(id, 4), render: genScore(id, 5), accuracy: genScore(id, 6), natural: genScore(id, 7),
+      lipSync: genScore(id, 8), subtitleAlign: genScore(id, 9), history: genScore(id, 10),
+      narrative: genScore(id, 11), bgQuality: genScore(id, 12), watermark: 100
+    };
+  }
+
+  // ========== 工具函数 ==========
+  function getLabel(score) {
+    if (score >= 90) return '优秀';
+    if (score >= 80) return '良好';
+    if (score >= 70) return '一般';
+    return '待改进';
+  }
+  function getBadgeClass(score) {
+    if (score >= 90) return 'badge-green';
+    if (score >= 80) return 'badge-blue';
+    if (score >= 70) return 'badge-yellow';
+    return 'badge-red';
+  }
+  function getScoreClass(score) {
+    if (score >= 90) return 'excellent';
+    if (score >= 80) return 'good';
+    if (score >= 70) return 'avg';
+    return 'poor';
+  }
+  function getBarClass(score) {
+    if (score >= 90) return 'green';
+    if (score >= 80) return 'blue';
+    if (score >= 70) return 'yellow';
+    return 'red';
+  }
+
+  // ========== 选择器初始化 ==========
+  function initSelector(selectedId) {
+    const sel = document.getElementById('contentSelect');
+    const items = getAllItems();
+    sel.innerHTML = '<option value="">选择内容查看质量报告...</option>' +
+      items.map(it => `<option value="${it.id}" ${it.id === selectedId ? 'selected' : ''}>${it.id} · ${it.title} · ${it.type}</option>`).join('');
+  }
+
+  // ========== 渲染质量报告 ==========
+  let currentScores = null;
+
+  function switchContent(id) {
+    if (!id) return;
+    // 更新URL但不刷新
+    const url = new URL(window.location.href);
+    url.searchParams.set('id', id);
+    window.history.replaceState({}, '', url);
+    renderQuality(id);
+  }
+
+  function renderQuality(id) {
+    currentScores = getScores(id);
+    const item = getAllItems().find(it => it.id === id) || {title:'', type:''};
+
+    document.getElementById('scoreTitle').textContent = '📊 综合质量评分 - ' + id;
+
+    // 更新四张卡片
+    updateCard('scoreOverall', currentScores.overall, getLabel(currentScores.overall));
+    updateCard('scoreVisual', currentScores.visual, '渲染精细 · 色彩准确');
+    updateCard('scoreAudio', currentScores.audio, '发音清晰 · 自然流畅');
+    updateCard('scoreSync', currentScores.sync, '唇形对齐 · 时间准确');
+
+    // 详细评分表
+    const dims = [
+      {name:'画面清晰度', score:currentScores.clarity},
+      {name:'数字人渲染质量', score:currentScores.render},
+      {name:'文物还原准确度', score:currentScores.accuracy},
+      {name:'语音自然度', score:currentScores.natural},
+      {name:'唇形同步精度', score:currentScores.lipSync},
+      {name:'字幕时间对齐', score:currentScores.subtitleAlign},
+      {name:'内容历史准确性', score:currentScores.history},
+      {name:'叙事流畅度', score:currentScores.narrative},
+      {name:'背景画面质量', score:currentScores.bgQuality},
+      {name:'水印标识合规', score:currentScores.watermark},
+    ];
+
+    document.getElementById('detailBody').innerHTML = dims.map(d => `
+      <tr><td>${d.name}</td><td>${d.score}/100</td>
+      <td><div class="bar-track"><div class="bar-fill ${getBarClass(d.score)}" style="width:${d.score}%"></div></div></td>
+      <td><span class="score-badge ${getBadgeClass(d.score)}">${getLabel(d.score)}</span></td></tr>
+    `).join('');
+
+    // 优势/劣势卡片
+    const sorted = [...dims].sort((a,b) => b.score - a.score);
+    const advantages = sorted.slice(0, 4);
+    const weaknesses = sorted.slice(-3).reverse();
+
+    document.getElementById('reportArea').innerHTML = `
+      <div class="report-card">
+        <div class="report-title">✅ 优势项</div>
+        ${advantages.map(d => `<div class="report-item"><span class="label">${d.name}</span><span class="value green">${d.score}/100</span></div>`).join('')}
+      </div>
+      <div class="report-card">
+        <div class="report-title">⚠️ 待优化项</div>
+        ${weaknesses.map(d => `<div class="report-item"><span class="label">${d.name}</span><span class="value ${d.score >= 80 ? 'green' : 'yellow'}">${d.score}/100</span></div>`).join('')}
+      </div>
+    `;
+
+    drawRadar();
+
+    // 数字递增动画
+    animateNumber('scoreOverall', currentScores.overall);
+    animateNumber('scoreVisual', currentScores.visual);
+    animateNumber('scoreAudio', currentScores.audio);
+    animateNumber('scoreSync', currentScores.sync);
+  }
+
+  function updateCard(id, score, detail) {
+    const el = document.getElementById(id);
+    el.textContent = score;
+    el.className = 'score-value ' + getScoreClass(score);
+    const detailEl = document.getElementById('label' + id.replace('score',''));
+    if (detailEl) detailEl.textContent = detail;
+  }
+
+  function animateNumber(id, target) {
+    const el = document.getElementById(id);
+    let current = 0;
+    const step = () => {
+      current += Math.ceil(target / 30);
+      if (current > target) current = target;
+      el.textContent = current;
+      if (current < target) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  // ========== 雷达图 ==========
   function drawRadar() {
     const canvas = document.getElementById('radarChart');
     const ctx = canvas.getContext('2d');
@@ -228,16 +383,16 @@
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
-    
+
     const w = rect.width, h = rect.height;
     const cx = w / 2, cy = h / 2;
     const radius = Math.min(w, h) * 0.35;
     const labels = ['画面质量', '音频质量', '同步精度', '内容准确', '字幕对齐', '叙事流畅'];
-    const values = [87, 95, 88, 85, 91, 93];
+    const values = currentScores ? [currentScores.visual, currentScores.audio, currentScores.sync, currentScores.history, currentScores.subtitleAlign, currentScores.narrative] : [87, 95, 88, 85, 91, 93];
     const n = labels.length;
-    
+
     ctx.clearRect(0, 0, w, h);
-    
+
     ctx.strokeStyle = '#30363d';
     ctx.lineWidth = 1;
     for (let i = 1; i <= 5; i++) {
@@ -252,14 +407,14 @@
       ctx.closePath();
       ctx.stroke();
     }
-    
+
     for (let i = 0; i < n; i++) {
       const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
       ctx.stroke();
-      
+
       const lx = cx + Math.cos(angle) * (radius + 28);
       const ly = cy + Math.sin(angle) * (radius + 28);
       ctx.fillStyle = '#8b949e';
@@ -268,7 +423,7 @@
       ctx.textBaseline = 'middle';
       ctx.fillText(labels[i], lx, ly);
     }
-    
+
     ctx.beginPath();
     for (let i = 0; i <= n; i++) {
       const angle = (Math.PI * 2 * (i % n) / n) - Math.PI / 2;
@@ -282,7 +437,7 @@
     ctx.strokeStyle = '#2f81f7';
     ctx.lineWidth = 2;
     ctx.stroke();
-    
+
     for (let i = 0; i < n; i++) {
       const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
       const r = radius * (values[i] / 100);
@@ -297,24 +452,17 @@
       ctx.stroke();
     }
   }
-  
-  drawRadar();
+
+  // ========== 初始化 ==========
+  function initQuality() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id') || 'WB-20260708-006';
+    initSelector(id);
+    renderQuality(id);
+  }
+
+  initQuality();
   window.addEventListener('resize', drawRadar);
-  
-  setTimeout(() => {
-    const scores = { scoreOverall: 92, scoreVisual: 87, scoreAudio: 95, scoreSync: 88 };
-    Object.entries(scores).forEach(([id, target]) => {
-      const el = document.getElementById(id);
-      let current = 0;
-      const step = () => {
-        current += 2;
-        if (current > target) current = target;
-        el.textContent = current;
-        if (current < target) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    });
-  }, 300);
 </script>
 
 </body>
