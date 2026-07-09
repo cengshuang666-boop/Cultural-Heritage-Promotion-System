@@ -337,6 +337,64 @@
           document.getElementById('generatePanel').style.display = 'none';
           document.getElementById('resultPanel').style.display = 'block';
           drawWaveform();
+          saveToAudit();
+        }, 500);
+      }
+    }, 150);
+  }
+
+  function saveToAudit() {
+    const text = document.getElementById('inputText').value.trim();
+    const title = text ? (text.slice(0, 10).replace(/\n/g, '') + '…') : '未命名音频';
+    const voiceEl = document.querySelector('.voice-item.selected');
+    const voiceName = voiceEl ? voiceEl.querySelector('.voice-name').textContent : '讲解员-女声';
+
+    let items = JSON.parse(localStorage.getItem('wenbo_audit_items') || '[]');
+    let maxSeq = 7;
+    items.forEach(it => {
+      const m = it.id.match(/WB-2026(\d{4})-(\d+)/);
+      if (m) maxSeq = Math.max(maxSeq, parseInt(m[2]));
+    });
+    const newSeq = String(maxSeq + 1).padStart(3, '0');
+    const id = 'WB-20260709-' + newSeq;
+
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+    const item = {
+      id: id,
+      title: title,
+      type: '音频合成',
+      status: 'pending',
+      date: '2026-07-09',
+      time: time,
+      source: 'audio',
+      extra: voiceName
+    };
+    items.push(item);
+    localStorage.setItem('wenbo_audit_items', JSON.stringify(items));
+  }
+    document.getElementById('generateBtn').disabled = true;
+    document.getElementById('generateBtn').textContent = '⏳ 合成中...';
+    document.getElementById('progressPanel').classList.add('active');
+    
+    const circle = document.getElementById('progressCircle');
+    const text = document.getElementById('progressText');
+    const circumference = 213.6;
+    let progress = 0;
+
+    const interval = setInterval(() => {
+      progress += Math.random() * 4 + 2;
+      if (progress > 100) progress = 100;
+      circle.style.strokeDashoffset = circumference - (progress / 100) * circumference;
+      text.textContent = Math.floor(progress) + '%';
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          document.getElementById('progressPanel').classList.remove('active');
+          document.getElementById('generatePanel').style.display = 'none';
+          document.getElementById('resultPanel').style.display = 'block';
+          drawWaveform();
         }, 500);
       }
     }, 150);

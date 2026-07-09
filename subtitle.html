@@ -338,6 +338,73 @@
         setTimeout(() => {
           document.getElementById('progressPanel').classList.remove('active');
           document.getElementById('resultPanel').classList.add('active');
+          saveToAudit();
+        }, 600);
+      }
+    }, 400);
+  }
+
+  function saveToAudit() {
+    const text = document.getElementById('inputText').value.trim();
+    const fileName = document.getElementById('fileName').textContent;
+    const hasFile = document.getElementById('fileInfo').style.display !== 'none';
+    const title = text ? (text.slice(0, 10).replace(/\n/g, '') + '…') : (hasFile ? fileName : '未命名字幕');
+    const format = document.getElementById('formatSelect').value.toUpperCase();
+
+    let items = JSON.parse(localStorage.getItem('wenbo_audit_items') || '[]');
+    let maxSeq = 7;
+    items.forEach(it => {
+      const m = it.id.match(/WB-2026(\d{4})-(\d+)/);
+      if (m) maxSeq = Math.max(maxSeq, parseInt(m[2]));
+    });
+    const newSeq = String(maxSeq + 1).padStart(3, '0');
+    const id = 'WB-20260709-' + newSeq;
+
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+    const item = {
+      id: id,
+      title: title,
+      type: '字幕生成',
+      status: 'pending',
+      date: '2026-07-09',
+      time: time,
+      source: 'subtitle',
+      extra: format
+    };
+    items.push(item);
+    localStorage.setItem('wenbo_audit_items', JSON.stringify(items));
+  }
+    document.getElementById('generateBtn').disabled = true;
+    document.getElementById('generateBtn').textContent = '⏳ 生成中...';
+    document.getElementById('progressPanel').classList.add('active');
+    document.getElementById('generatePanel').style.display = 'none';
+
+    const fill = document.getElementById('progressFill');
+    const text = document.getElementById('progressText');
+    const detail = document.getElementById('progressDetail');
+    const steps = [
+      { pct: 15, text: '正在处理音频...', detail: '语音预处理' },
+      { pct: 35, text: '语音识别中...', detail: 'ASR 模型推理' },
+      { pct: 55, text: '语义分析中...', detail: '自然语言分句' },
+      { pct: 70, text: '时间轴对齐...', detail: '音字对齐算法' },
+      { pct: 85, text: '格式化输出...', detail: 'SRT 编码生成' },
+      { pct: 100, text: '生成完成！', detail: '字幕文件已就绪' }
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step < steps.length) {
+        fill.style.width = steps[step].pct + '%';
+        text.textContent = steps[step].text;
+        detail.textContent = steps[step].detail;
+        step++;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => {
+          document.getElementById('progressPanel').classList.remove('active');
+          document.getElementById('resultPanel').classList.add('active');
         }, 600);
       }
     }, 400);
