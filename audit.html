@@ -8,7 +8,7 @@
     :root {
       --bg-deep: #0d1117; --bg-card: #161b22; --bg-hover: #21262d; --border: #30363d;
       --text-primary: #c9d1d9; --text-secondary: #8b949e; --accent: #2f81f7; --accent-hover: #58a6ff;
-      --green: #238636; --green-text: #3fb950; --red: #da3633; --yellow: #9e8c00; --tag-bg: rgba(47,129,247,0.15);
+      --green: #238636; --green-text: #3fb950; --red: #da3633; --red-text: #f85149; --yellow: #9e8c00; --tag-bg: rgba(47,129,247,0.15);
       --sidebar-active: rgba(47,129,247,0.12);
     }
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -43,7 +43,7 @@
     .stat-label { font-size:13px; color:var(--text-secondary); }
 
     .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:20px; }
-    .panel-title { font-size:16px; font-weight:600; margin-bottom:16px; }
+    .panel-title { font-size:16px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
 
     .filter-bar { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
     .filter-select { padding:8px 14px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none; cursor:pointer; }
@@ -51,18 +51,25 @@
     .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; border:none; transition:.15s; font-weight:500; }
     .btn-primary { background:var(--accent); color:#fff; }
     .btn-primary:hover { background:var(--accent-hover); }
+    .btn-success { background:var(--green); color:#fff; }
+    .btn-success:hover { background:#2ea043; }
+    .btn-danger { background:var(--red); color:#fff; }
+    .btn-danger:hover { background:#f85149; }
     .btn-sm { padding:5px 12px; font-size:12px; }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
 
     .table { width:100%; border-collapse:collapse; }
     .table th { text-align:left; padding:12px 16px; font-size:12px; color:var(--text-secondary); font-weight:500; border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.5px; }
     .table td { padding:12px 16px; font-size:13px; border-bottom:1px solid var(--border); }
     .table tr:hover { background:var(--bg-hover); }
     .table tr:last-child td { border-bottom:none; }
+    .table tr.hidden { display:none; }
     .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:500; }
     .tag-blue { background:var(--tag-bg); color:var(--accent-hover); }
     .tag-green { background:rgba(35,134,54,0.15); color:var(--green-text); }
     .tag-yellow { background:rgba(217,165,20,0.15); color:var(--yellow-text); }
     .tag-red { background:rgba(218,54,51,0.15); color:var(--red); }
+    .checkbox { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
 
     .right-panel { margin-left:20px; }
     .right-item { padding:12px 0; border-bottom:1px solid var(--border); font-size:13px; }
@@ -71,6 +78,39 @@
 
     .two-col { display:grid; grid-template-columns:1fr 320px; gap:20px; }
     @media (max-width: 900px) { .two-col { grid-template-columns:1fr; } }
+
+    /* Modal */
+    .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.active { display:flex; }
+    .modal { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; }
+    .modal-header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .modal-title { font-size:16px; font-weight:600; }
+    .modal-close { background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer; padding:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:6px; }
+    .modal-close:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .modal-body { padding:24px; }
+    .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+
+    .preview-box { width:100%; aspect-ratio:16/9; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; position:relative; overflow:hidden; }
+    .preview-box .play-icon { width:48px; height:48px; background:rgba(47,129,247,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; cursor:pointer; }
+    .preview-box .watermark { position:absolute; bottom:8px; right:8px; padding:3px 8px; background:rgba(0,0,0,0.6); border-radius:4px; font-size:11px; color:#fff; }
+    .preview-info { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+    .info-item { background:var(--bg-hover); padding:10px 14px; border-radius:6px; font-size:13px; }
+    .info-label { font-size:11px; color:var(--text-secondary); margin-bottom:2px; }
+    .info-value { font-weight:500; }
+
+    .checklist { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+    .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg-hover); border-radius:6px; cursor:pointer; transition:.15s; border:2px solid transparent; }
+    .check-item:hover { border-color:var(--border); }
+    .check-item.checked { border-color:var(--green); background:rgba(35,134,54,0.08); }
+    .check-item input { width:18px; height:18px; accent-color:var(--green); cursor:pointer; }
+    .check-item label { flex:1; cursor:pointer; font-size:13px; }
+
+    .form-textarea { width:100%; min-height:80px; padding:12px 14px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none; font-family:inherit; resize:vertical; }
+    .form-textarea:focus { border-color:var(--accent); }
+
+    .toast { position:fixed; bottom:24px; right:24px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:14px 20px; font-size:14px; box-shadow:0 4px 20px rgba(0,0,0,0.4); z-index:300; display:none; align-items:center; gap:10px; }
+    .toast.active { display:flex; animation:slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
   </style>
 </head>
 <body>
@@ -139,7 +179,7 @@
 
     <div class="stats">
       <div class="stat-card">
-        <div class="stat-value" style="color:var(--yellow-text);">12</div>
+        <div class="stat-value" id="statPending" style="color:var(--yellow-text);">3</div>
         <div class="stat-label">待审核</div>
       </div>
       <div class="stat-card">
@@ -151,7 +191,7 @@
         <div class="stat-label">通过率</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" style="color:var(--red);">5</div>
+        <div class="stat-value" id="statRejected" style="color:var(--red);">1</div>
         <div class="stat-label">已拦截</div>
       </div>
     </div>
@@ -159,41 +199,112 @@
     <div class="two-col">
       <div>
         <div class="panel">
-          <div class="panel-title">🔍 审核列表</div>
+          <div class="panel-title">
+            <span>🔍 审核列表</span>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input type="checkbox" id="selectAll" class="checkbox" title="全选" onchange="toggleSelectAll()">
+              <span style="font-size:12px; color:var(--text-secondary);">全选</span>
+            </div>
+          </div>
           <div class="filter-bar">
-            <select class="filter-select">
-              <option>全部状态</option>
-              <option>待审核</option>
-              <option>已通过</option>
-              <option>已驳回</option>
+            <select class="filter-select" id="filterStatus" onchange="applyFilter()">
+              <option value="all">全部状态</option>
+              <option value="pending">待审核</option>
+              <option value="approved">已通过</option>
+              <option value="rejected">已驳回</option>
             </select>
-            <select class="filter-select">
-              <option>全部类型</option>
-              <option>博物馆导览</option>
-              <option>文物讲解</option>
-              <option>科普短片</option>
-              <option>展览预告</option>
+            <select class="filter-select" id="filterType" onchange="applyFilter()">
+              <option value="all">全部类型</option>
+              <option value="博物馆导览">博物馆导览</option>
+              <option value="文物讲解">文物讲解</option>
+              <option value="科普短片">科普短片</option>
+              <option value="展览预告">展览预告</option>
+              <option value="历史故事">历史故事</option>
             </select>
-            <select class="filter-select">
-              <option>全部日期</option>
-              <option>今天</option>
-              <option>近7天</option>
-              <option>近30天</option>
+            <select class="filter-select" id="filterDate" onchange="applyFilter()">
+              <option value="all">全部日期</option>
+              <option value="today">今天</option>
+              <option value="week">近7天</option>
+              <option value="month">近30天</option>
             </select>
           </div>
           <table class="table">
             <thead>
-              <tr><th>内容ID</th><th>标题</th><th>类型</th><th>审核状态</th><th>提交时间</th><th>操作</th></tr>
+              <tr><th style="width:28px;"></th><th>内容ID</th><th>标题</th><th>类型</th><th>审核状态</th><th>提交时间</th><th>操作</th></tr>
             </thead>
-            <tbody>
-              <tr><td>WB-20250708-003</td><td>宋代书画科普</td><td><span class="tag tag-blue">科普短片</span></td><td><span class="tag tag-yellow">审核中</span></td><td>08:45</td><td><button class="btn btn-primary btn-sm">审核</button></td></tr>
-              <tr><td>WB-20250708-006</td><td>汉代玉器鉴赏</td><td><span class="tag tag-blue">文物讲解</span></td><td><span class="tag tag-yellow">审核中</span></td><td>08:30</td><td><button class="btn btn-primary btn-sm">审核</button></td></tr>
-              <tr><td>WB-20250708-007</td><td>陶瓷艺术展预告</td><td><span class="tag tag-blue">展览预告</span></td><td><span class="tag tag-yellow">审核中</span></td><td>07:55</td><td><button class="btn btn-primary btn-sm">审核</button></td></tr>
-              <tr><td>WB-20250708-005</td><td>唐代瓷器展厅导览</td><td><span class="tag tag-blue">博物馆导览</span></td><td><span class="tag tag-green">已通过</span></td><td>10:30</td><td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);">查看</button></td></tr>
-              <tr><td>WB-20250708-004</td><td>青铜鼎文物讲解</td><td><span class="tag tag-blue">文物讲解</span></td><td><span class="tag tag-green">已通过</span></td><td>09:15</td><td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);">查看</button></td></tr>
-              <tr><td>WB-20250708-002</td><td>明清家具介绍</td><td><span class="tag tag-blue">科普短片</span></td><td><span class="tag tag-red">已驳回</span></td><td>07:20</td><td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);">查看</button></td></tr>
-              <tr><td>WB-20250707-001</td><td>历史故事：丝绸之路</td><td><span class="tag tag-blue">历史故事</span></td><td><span class="tag tag-green">已通过</span></td><td>14:00</td><td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);">查看</button></td></tr>
-              <tr><td>WB-20250707-002</td><td>特展预告片</td><td><span class="tag tag-blue">展览预告</span></td><td><span class="tag tag-green">已通过</span></td><td>16:20</td><td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);">查看</button></td></tr>
+            <tbody id="auditTable">
+              <tr data-status="pending" data-type="科普短片" data-date="2025-07-08">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250708-003</td>
+                <td>宋代书画科普</td>
+                <td><span class="tag tag-blue">科普短片</span></td>
+                <td><span class="tag tag-yellow status-cell">审核中</span></td>
+                <td>08:45</td>
+                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20250708-003', '宋代书画科普')">审核</button></td>
+              </tr>
+              <tr data-status="pending" data-type="文物讲解" data-date="2025-07-08">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250708-006</td>
+                <td>汉代玉器鉴赏</td>
+                <td><span class="tag tag-blue">文物讲解</span></td>
+                <td><span class="tag tag-yellow status-cell">审核中</span></td>
+                <td>08:30</td>
+                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20250708-006', '汉代玉器鉴赏')">审核</button></td>
+              </tr>
+              <tr data-status="pending" data-type="展览预告" data-date="2025-07-08">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250708-007</td>
+                <td>陶瓷艺术展预告</td>
+                <td><span class="tag tag-blue">展览预告</span></td>
+                <td><span class="tag tag-yellow status-cell">审核中</span></td>
+                <td>07:55</td>
+                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20250708-007', '陶瓷艺术展预告')">审核</button></td>
+              </tr>
+              <tr data-status="approved" data-type="博物馆导览" data-date="2025-07-08">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250708-005</td>
+                <td>唐代瓷器展厅导览</td>
+                <td><span class="tag tag-blue">博物馆导览</span></td>
+                <td><span class="tag tag-green status-cell">已通过</span></td>
+                <td>10:30</td>
+                <td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);" onclick="openView('WB-20250708-005', '唐代瓷器展厅导览')">查看</button></td>
+              </tr>
+              <tr data-status="approved" data-type="文物讲解" data-date="2025-07-08">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250708-004</td>
+                <td>青铜鼎文物讲解</td>
+                <td><span class="tag tag-blue">文物讲解</span></td>
+                <td><span class="tag tag-green status-cell">已通过</span></td>
+                <td>09:15</td>
+                <td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);" onclick="openView('WB-20250708-004', '青铜鼎文物讲解')">查看</button></td>
+              </tr>
+              <tr data-status="rejected" data-type="科普短片" data-date="2025-07-08">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250708-002</td>
+                <td>明清家具介绍</td>
+                <td><span class="tag tag-blue">科普短片</span></td>
+                <td><span class="tag tag-red status-cell">已驳回</span></td>
+                <td>07:20</td>
+                <td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);" onclick="openView('WB-20250708-002', '明清家具介绍')">查看</button></td>
+              </tr>
+              <tr data-status="approved" data-type="历史故事" data-date="2025-07-07">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250707-001</td>
+                <td>历史故事：丝绸之路</td>
+                <td><span class="tag tag-blue">历史故事</span></td>
+                <td><span class="tag tag-green status-cell">已通过</span></td>
+                <td>14:00</td>
+                <td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);" onclick="openView('WB-20250707-001', '历史故事：丝绸之路')">查看</button></td>
+              </tr>
+              <tr data-status="approved" data-type="展览预告" data-date="2025-07-07">
+                <td><input type="checkbox" class="checkbox row-check"></td>
+                <td>WB-20250707-002</td>
+                <td>特展预告片</td>
+                <td><span class="tag tag-blue">展览预告</span></td>
+                <td><span class="tag tag-green status-cell">已通过</span></td>
+                <td>16:20</td>
+                <td><button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);" onclick="openView('WB-20250707-002', '特展预告片')">查看</button></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -224,30 +335,349 @@
         </div>
         <div class="panel">
           <div class="panel-title">📝 审核日志</div>
-          <div class="right-item">
-            <div class="right-label">10:30 · 审核员A</div>
-            WB-20250708-005 审核通过
-          </div>
-          <div class="right-item">
-            <div class="right-label">09:15 · 审核员B</div>
-            WB-20250708-004 审核通过
-          </div>
-          <div class="right-item">
-            <div class="right-label">07:45 · 审核员A</div>
-            WB-20250708-002 历史年代有误，驳回修改
+          <div class="right-item" id="logList">
+            <div class="right-item" style="padding:0; border-bottom:1px solid var(--border);">
+              <div class="right-label">10:30 · 审核员A</div>
+              WB-20250708-005 审核通过
+            </div>
+            <div class="right-item" style="padding:0; border-bottom:1px solid var(--border);">
+              <div class="right-label">09:15 · 审核员B</div>
+              WB-20250708-004 审核通过
+            </div>
+            <div class="right-item" style="padding:0; border-bottom:none;">
+              <div class="right-label">07:45 · 审核员A</div>
+              WB-20250708-002 历史年代有误，驳回修改
+            </div>
           </div>
         </div>
         <div class="panel">
           <div class="panel-title">⚡ 快捷操作</div>
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <button class="btn btn-primary" style="width:100%; justify-content:center;">🔍 批量审核</button>
-            <button class="btn btn-sm" style="width:100%; justify-content:center; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border);">📊 导出报告</button>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="batchAudit()">🔍 批量审核</button>
+            <button class="btn btn-sm" style="width:100%; justify-content:center; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border);" onclick="exportReport()">📊 导出报告</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </main>
+
+<!-- 审核弹窗 -->
+<div class="modal-overlay" id="auditModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">审核内容</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="preview-box">
+        <div class="play-icon">▶</div>
+        <div class="watermark">AI生成 · 深度合成</div>
+      </div>
+      <div class="preview-info">
+        <div class="info-item"><div class="info-label">内容ID</div><div class="info-value" id="modalId">-</div></div>
+        <div class="info-item"><div class="info-label">标题</div><div class="info-value" id="modalName">-</div></div>
+        <div class="info-item"><div class="info-label">时长</div><div class="info-value">02:36</div></div>
+        <div class="info-item"><div class="info-label">分辨率</div><div class="info-value">1920×1080</div></div>
+      </div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:12px;">📋 审核检查清单</div>
+      <div class="checklist" id="checklist">
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" id="c1" onchange="event.stopPropagation()">
+          <label for="c1">历史准确性 — 文物年代、描述与权威资料一致</label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" id="c2" onchange="event.stopPropagation()">
+          <label for="c2">AIGC标识 — 已嵌入AI生成溯源水印</label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" id="c3" onchange="event.stopPropagation()">
+          <label for="c3">数字人合规 — 虚拟人形象标注"AI生成数字人"</label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" id="c4" onchange="event.stopPropagation()">
+          <label for="c4">敏感内容 — 无政治、宗教、色情等违规内容</label>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox" id="c5" onchange="event.stopPropagation()">
+          <label for="c5">版权合规 — 背景音乐、字体使用授权素材</label>
+        </div>
+      </div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:8px;">📝 审核备注</div>
+      <textarea class="form-textarea" id="auditNote" placeholder="如有问题请详细描述..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border);" onclick="closeModal()">取消</button>
+      <button class="btn btn-danger" onclick="doReject()">❌ 驳回</button>
+      <button class="btn btn-success" onclick="doApprove()">✅ 通过</button>
+    </div>
+  </div>
+</div>
+
+<!-- 查看详情弹窗 -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">内容详情</span>
+      <button class="modal-close" onclick="closeView()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="preview-box">
+        <div class="play-icon">▶</div>
+        <div class="watermark">AI生成 · 深度合成</div>
+      </div>
+      <div class="preview-info">
+        <div class="info-item"><div class="info-label">内容ID</div><div class="info-value" id="viewId">-</div></div>
+        <div class="info-item"><div class="info-label">标题</div><div class="info-value" id="viewName">-</div></div>
+        <div class="info-item"><div class="info-label">审核状态</div><div class="info-value" id="viewStatus">-</div></div>
+        <div class="info-item"><div class="info-label">审核时间</div><div class="info-value">2025-07-08 10:30</div></div>
+      </div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:8px; margin-top:16px;">📋 审核记录</div>
+      <div class="info-item" style="margin-bottom:8px;">
+        <div class="info-label">审核结果</div>
+        <div class="info-value" id="viewResult">-</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">审核备注</div>
+        <div class="info-value" style="font-size:13px; color:var(--text-secondary);">内容符合审核标准，历史准确性已验证，AIGC标识完整。</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border);" onclick="closeView()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 批量审核弹窗 -->
+<div class="modal-overlay" id="batchModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <span class="modal-title">批量审核</span>
+      <button class="modal-close" onclick="closeBatch()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary); font-size:13px; margin-bottom:16px;">已选择 <strong id="batchCount" style="color:var(--text-primary);">0</strong> 条记录，请选择批量操作：</p>
+      <div style="display:flex; gap:12px; margin-bottom:20px;">
+        <button class="btn btn-success" style="flex:1; justify-content:center;" onclick="batchApprove()">✅ 全部通过</button>
+        <button class="btn btn-danger" style="flex:1; justify-content:center;" onclick="batchReject()">❌ 全部驳回</button>
+      </div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:8px;">📝 批量备注</div>
+      <textarea class="form-textarea" id="batchNote" placeholder="批量审核备注..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" style="background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border);" onclick="closeBatch()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 通知 -->
+<div class="toast" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">操作成功</span>
+</div>
+
+<script>
+  let currentAuditId = null;
+  let currentAuditRow = null;
+
+  function applyFilter() {
+    const status = document.getElementById('filterStatus').value;
+    const type = document.getElementById('filterType').value;
+    const date = document.getElementById('filterDate').value;
+    const rows = document.querySelectorAll('#auditTable tr');
+
+    rows.forEach(row => {
+      const rowStatus = row.dataset.status;
+      const rowType = row.dataset.type;
+      const rowDate = row.dataset.date;
+
+      let show = true;
+      if (status !== 'all' && rowStatus !== status) show = false;
+      if (type !== 'all' && rowType !== type) show = false;
+      if (date !== 'all') {
+        if (date === 'today' && rowDate !== '2025-07-08') show = false;
+        if (date === 'week' && (rowDate < '2025-07-01' || rowDate > '2025-07-08')) show = false;
+        if (date === 'month' && (rowDate < '2025-06-08' || rowDate > '2025-07-08')) show = false;
+      }
+      row.classList.toggle('hidden', !show);
+    });
+  }
+
+  function openAudit(id, name) {
+    currentAuditId = id;
+    document.getElementById('modalTitle').textContent = '审核内容 — ' + id;
+    document.getElementById('modalId').textContent = id;
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('auditNote').value = '';
+    document.querySelectorAll('#checklist input').forEach(c => { c.checked = false; c.parentElement.classList.remove('checked'); });
+    document.getElementById('auditModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('auditModal').classList.remove('active');
+    currentAuditId = null;
+  }
+
+  function openView(id, name) {
+    document.getElementById('viewId').textContent = id;
+    document.getElementById('viewName').textContent = name;
+    const row = [...document.querySelectorAll('#auditTable tr')].find(r => r.querySelector('td:nth-child(2)')?.textContent === id);
+    if (row) {
+      const status = row.dataset.status;
+      document.getElementById('viewStatus').textContent = status === 'approved' ? '已通过' : (status === 'rejected' ? '已驳回' : '审核中');
+      document.getElementById('viewResult').textContent = status === 'approved' ? '✅ 审核通过' : (status === 'rejected' ? '❌ 已驳回' : '⏳ 审核中');
+    }
+    document.getElementById('viewModal').classList.add('active');
+  }
+
+  function closeView() {
+    document.getElementById('viewModal').classList.remove('active');
+  }
+
+  function toggleCheck(el) {
+    const cb = el.querySelector('input');
+    cb.checked = !cb.checked;
+    el.classList.toggle('checked', cb.checked);
+  }
+
+  function doApprove() {
+    if (!currentAuditId) return;
+    const row = [...document.querySelectorAll('#auditTable tr')].find(r => r.querySelector('td:nth-child(2)')?.textContent === currentAuditId);
+    if (row) {
+      row.dataset.status = 'approved';
+      row.querySelector('.status-cell').textContent = '已通过';
+      row.querySelector('.status-cell').className = 'tag tag-green status-cell';
+      const btn = row.querySelector('td:last-child button');
+      btn.textContent = '查看';
+      btn.className = 'btn btn-sm';
+      btn.style.cssText = 'background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);';
+      btn.onclick = () => openView(currentAuditId, row.querySelector('td:nth-child(3)').textContent);
+    }
+    addLog(currentAuditId, '审核通过');
+    updateStats();
+    closeModal();
+    showToast('✅', '审核已通过：' + currentAuditId);
+  }
+
+  function doReject() {
+    if (!currentAuditId) return;
+    const row = [...document.querySelectorAll('#auditTable tr')].find(r => r.querySelector('td:nth-child(2)')?.textContent === currentAuditId);
+    if (row) {
+      row.dataset.status = 'rejected';
+      row.querySelector('.status-cell').textContent = '已驳回';
+      row.querySelector('.status-cell').className = 'tag tag-red status-cell';
+      const btn = row.querySelector('td:last-child button');
+      btn.textContent = '查看';
+      btn.className = 'btn btn-sm';
+      btn.style.cssText = 'background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);';
+      btn.onclick = () => openView(currentAuditId, row.querySelector('td:nth-child(3)').textContent);
+    }
+    const note = document.getElementById('auditNote').value || '历史年代有误，驳回修改';
+    addLog(currentAuditId, '已驳回 — ' + note);
+    updateStats();
+    closeModal();
+    showToast('❌', '审核已驳回：' + currentAuditId);
+  }
+
+  function addLog(id, action) {
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    const logList = document.getElementById('logList');
+    const entry = document.createElement('div');
+    entry.className = 'right-item';
+    entry.style.cssText = 'padding:0; border-bottom:1px solid var(--border);';
+    entry.innerHTML = '<div class="right-label">' + time + ' · 审核员A</div>' + id + ' ' + action;
+    logList.insertBefore(entry, logList.firstChild);
+    if (logList.children.length > 6) logList.removeChild(logList.lastChild);
+  }
+
+  function updateStats() {
+    const pending = document.querySelectorAll('#auditTable tr[data-status="pending"]').length;
+    const rejected = document.querySelectorAll('#auditTable tr[data-status="rejected"]').length;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statRejected').textContent = rejected;
+  }
+
+  function toggleSelectAll() {
+    const checked = document.getElementById('selectAll').checked;
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = checked);
+  }
+
+  function batchAudit() {
+    const checked = [...document.querySelectorAll('.row-check:checked')].map(cb => cb.closest('tr'));
+    if (checked.length === 0) {
+      showToast('⚠️', '请至少选择一条记录');
+      return;
+    }
+    document.getElementById('batchCount').textContent = checked.length;
+    document.getElementById('batchModal').classList.add('active');
+  }
+
+  function closeBatch() {
+    document.getElementById('batchModal').classList.remove('active');
+  }
+
+  function batchApprove() {
+    const rows = [...document.querySelectorAll('.row-check:checked')].map(cb => cb.closest('tr'));
+    rows.forEach(row => {
+      const id = row.querySelector('td:nth-child(2)').textContent;
+      row.dataset.status = 'approved';
+      row.querySelector('.status-cell').textContent = '已通过';
+      row.querySelector('.status-cell').className = 'tag tag-green status-cell';
+      const btn = row.querySelector('td:last-child button');
+      btn.textContent = '查看';
+      btn.className = 'btn btn-sm';
+      btn.style.cssText = 'background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);';
+      btn.onclick = () => openView(id, row.querySelector('td:nth-child(3)').textContent);
+      addLog(id, '批量审核通过');
+    });
+    updateStats();
+    closeBatch();
+    document.getElementById('selectAll').checked = false;
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+    showToast('✅', '批量审核通过 ' + rows.length + ' 条记录');
+  }
+
+  function batchReject() {
+    const rows = [...document.querySelectorAll('.row-check:checked')].map(cb => cb.closest('tr'));
+    rows.forEach(row => {
+      const id = row.querySelector('td:nth-child(2)').textContent;
+      row.dataset.status = 'rejected';
+      row.querySelector('.status-cell').textContent = '已驳回';
+      row.querySelector('.status-cell').className = 'tag tag-red status-cell';
+      const btn = row.querySelector('td:last-child button');
+      btn.textContent = '查看';
+      btn.className = 'btn btn-sm';
+      btn.style.cssText = 'background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);';
+      btn.onclick = () => openView(id, row.querySelector('td:nth-child(3)').textContent);
+      addLog(id, '批量审核驳回');
+    });
+    updateStats();
+    closeBatch();
+    document.getElementById('selectAll').checked = false;
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+    showToast('❌', '批量审核驳回 ' + rows.length + ' 条记录');
+  }
+
+  function exportReport() {
+    showToast('📊', '审核报告导出成功！');
+  }
+
+  function showToast(icon, msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastIcon').textContent = icon;
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.add('active');
+    setTimeout(() => toast.classList.remove('active'), 3000);
+  }
+
+  // 点击遮罩关闭弹窗
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+  });
+</script>
 
 </body>
 </html>
