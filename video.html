@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文博AI宣传视频平台 - 视频生成</title>
+  <style>
+    :root {
+      --bg-deep: #0d1117;
+      --bg-card: #161b22;
+      --bg-hover: #21262d;
+      --border: #30363d;
+      --text-primary: #c9d1d9;
+      --text-secondary: #8b949e;
+      --accent: #2f81f7;
+      --accent-hover: #58a6ff;
+      --green: #238636;
+      --green-text: #3fb950;
+      --red: #da3633;
+      --yellow: #9e8c00;
+      --yellow-text: #d29922;
+      --tag-bg: rgba(47,129,247,0.15);
+      --tag-text: #58a6ff;
+      --sidebar-active: rgba(47,129,247,0.12);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,"Noto Sans SC",sans-serif; background:var(--bg-deep); color:var(--text-primary); font-size:14px; }
+    a { text-decoration:none; color:inherit; }
+
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:56px; background:var(--bg-card); border-bottom:1px solid var(--border); position:fixed; top:0; left:0; right:0; z-index:100; }
+    .topbar-left { display:flex; align-items:center; gap:32px; }
+    .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:600; color:var(--text-primary); }
+    .logo-icon { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+    .topnav { display:flex; gap:28px; }
+    .topnav a { font-size:14px; color:var(--text-secondary); padding:18px 0; border-bottom:2px solid transparent; transition:.2s; }
+    .topnav a:hover, .topnav a.active { color:var(--text-primary); border-bottom-color:var(--accent); }
+    .topnav a.active { color:var(--accent-hover); }
+    .topbar-right { display:flex; align-items:center; gap:12px; color:var(--text-secondary); font-size:13px; }
+    .user-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:12px; }
+
+    .sidebar { position:fixed; top:56px; left:0; width:210px; height:calc(100vh - 56px); background:var(--bg-card); border-right:1px solid var(--border); overflow-y:auto; z-index:90; }
+    .sidebar-group { padding:12px 0; border-bottom:1px solid var(--border); }
+    .sidebar-group:last-child { border-bottom:none; }
+    .sidebar-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:13px; color:var(--text-secondary); cursor:pointer; transition:.15s; }
+    .sidebar-item:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .sidebar-item.active { background:var(--sidebar-active); color:var(--accent-hover); border-left:3px solid var(--accent); padding-left:17px; }
+    .sidebar-item svg { width:16px; height:16px; flex-shrink:0; }
+
+    .main { margin-left:210px; margin-top:56px; padding:24px; min-height:calc(100vh - 56px); }
+    .content { max-width:1100px; margin:0 auto; }
+
+    .page-title { font-size:22px; font-weight:600; margin-bottom:4px; }
+    .page-desc { color:var(--text-secondary); font-size:13px; margin-bottom:24px; }
+
+    /* 步骤条 */
+    .step-bar { display:flex; align-items:center; gap:8px; margin-bottom:32px; }
+    .step { display:flex; align-items:center; gap:8px; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:500; transition:.3s; }
+    .step-num { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+    .step.active { background:var(--sidebar-active); color:var(--accent-hover); }
+    .step.active .step-num { background:var(--accent); color:#fff; }
+    .step.done { color:var(--green-text); }
+    .step.done .step-num { background:var(--green); color:#fff; }
+    .step.pending { color:var(--text-secondary); }
+    .step.pending .step-num { background:var(--bg-hover); border:1px solid var(--border); }
+    .step-arrow { color:var(--text-secondary); }
+
+    /* 面板 */
+    .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; margin-bottom:20px; }
+    .panel-title { font-size:16px; font-weight:600; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+
+    /* 模板卡片 */
+    .template-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+    .template-card { background:var(--bg-hover); border:2px solid transparent; border-radius:10px; padding:20px; cursor:pointer; transition:.2s; position:relative; }
+    .template-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .template-card.selected { border-color:var(--accent); background:rgba(47,129,247,0.08); }
+    .template-card.selected::after { content:"✓"; position:absolute; top:10px; right:10px; width:22px; height:22px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff; }
+    .template-preview { width:100%; height:120px; background:var(--bg-deep); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:36px; margin-bottom:12px; }
+    .template-name { font-size:14px; font-weight:600; margin-bottom:4px; }
+    .template-desc { font-size:12px; color:var(--text-secondary); }
+
+    /* 文案输入 */
+    .script-input { width:100%; min-height:180px; background:var(--bg-hover); border:1px solid var(--border); border-radius:8px; padding:16px; color:var(--text-primary); font-size:14px; line-height:1.8; font-family:inherit; resize:vertical; outline:none; }
+    .script-input:focus { border-color:var(--accent); }
+    .script-input::placeholder { color:var(--text-secondary); }
+    .script-toolbar { display:flex; gap:8px; margin-bottom:12px; }
+    .tool-btn { padding:6px 12px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text-secondary); cursor:pointer; transition:.15s; }
+    .tool-btn:hover { background:var(--border); color:var(--text-primary); }
+
+    /* 数字人选择 */
+    .avatar-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; }
+    .avatar-card { background:var(--bg-hover); border:2px solid transparent; border-radius:10px; padding:16px; text-align:center; cursor:pointer; transition:.2s; }
+    .avatar-card:hover { border-color:var(--accent); }
+    .avatar-card.selected { border-color:var(--accent); background:rgba(47,129,247,0.08); }
+    .avatar-img { width:64px; height:64px; border-radius:50%; background:var(--bg-deep); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:28px; }
+    .avatar-name { font-size:13px; font-weight:500; }
+    .avatar-tag { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+
+    /* 声线选择 */
+    .voice-list { display:flex; flex-direction:column; gap:10px; }
+    .voice-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-hover); border:2px solid transparent; border-radius:8px; cursor:pointer; transition:.15s; }
+    .voice-item:hover { border-color:var(--border); }
+    .voice-item.selected { border-color:var(--accent); background:rgba(47,129,247,0.08); }
+    .voice-icon { width:36px; height:36px; border-radius:50%; background:var(--bg-deep); display:flex; align-items:center; justify-content:center; font-size:16px; }
+    .voice-info { flex:1; }
+    .voice-name { font-size:13px; font-weight:500; }
+    .voice-desc { font-size:12px; color:var(--text-secondary); }
+    .voice-play { padding:6px 14px; background:var(--accent); border:none; border-radius:6px; color:#fff; font-size:12px; cursor:pointer; }
+
+    /* 底部按钮 */
+    .bottom-bar { display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 24px; border-radius:8px; font-size:14px; cursor:pointer; border:none; transition:.15s; font-weight:500; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-primary:hover { background:var(--accent-hover); }
+    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+    .btn-secondary { background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border); }
+    .btn-secondary:hover { background:var(--border); }
+
+    /* 生成进度 */
+    .progress-panel { display:none; text-align:center; padding:40px; }
+    .progress-panel.active { display:block; }
+    .progress-ring { width:120px; height:120px; margin:0 auto 24px; position:relative; }
+    .progress-ring svg { transform:rotate(-90deg); }
+    .progress-ring-bg { fill:none; stroke:var(--bg-hover); stroke-width:8; }
+    .progress-ring-fill { fill:none; stroke:var(--accent); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 0.3s; }
+    .progress-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:24px; font-weight:700; }
+    .progress-label { font-size:14px; color:var(--text-secondary); margin-bottom:8px; }
+    .progress-detail { font-size:13px; color:var(--text-secondary); }
+    .progress-log { max-width:400px; margin:20px auto 0; text-align:left; background:var(--bg-deep); border-radius:8px; padding:12px 16px; font-size:12px; color:var(--text-secondary); line-height:1.8; max-height:120px; overflow-y:auto; }
+    .progress-log .log-line { animation:fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+    /* 结果预览 */
+    .result-panel { display:none; }
+    .result-panel.active { display:block; }
+    .video-player { width:100%; max-width:640px; margin:0 auto 24px; background:var(--bg-deep); border-radius:12px; overflow:hidden; border:1px solid var(--border); }
+    .video-screen { aspect-ratio:16/9; background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); display:flex; align-items:center; justify-content:center; position:relative; }
+    .video-screen .play-btn { width:60px; height:60px; background:rgba(47,129,247,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; color:#fff; cursor:pointer; transition:.2s; }
+    .video-screen .play-btn:hover { transform:scale(1.1); }
+    .video-screen .watermark { position:absolute; bottom:12px; right:12px; padding:4px 10px; background:rgba(0,0,0,0.6); border-radius:4px; font-size:11px; color:#fff; }
+    .video-controls { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-hover); }
+    .video-progress { flex:1; height:4px; background:var(--border); border-radius:2px; cursor:pointer; }
+    .video-progress-fill { height:100%; width:0%; background:var(--accent); border-radius:2px; transition:width 0.3s; }
+    .video-time { font-size:12px; color:var(--text-secondary); }
+
+    .result-actions { display:flex; gap:12px; justify-content:center; }
+
+    /* 配置行 */
+    .config-row { display:flex; gap:16px; margin-bottom:16px; }
+    .config-item { flex:1; }
+    .config-label { font-size:12px; color:var(--text-secondary); margin-bottom:6px; }
+    .config-select { width:100%; padding:10px 14px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none; cursor:pointer; }
+    .config-select:focus { border-color:var(--accent); }
+
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">
+      <div class="logo-icon">🏛</div>
+      文博AI宣传视频平台
+    </div>
+    <nav class="topnav">
+      <a href="index.html">首页</a>
+      <a href="video.html" class="active">视频生成</a>
+      <a href="audit.html">数据审核</a>
+      <a href="avatar.html">数字人管理</a>
+      <a href="quality.html">质量评价</a>
+      <a href="report.html">举报反馈</a>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <div class="user-avatar">A</div>
+    机构用户
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="sidebar-group">
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h2v2H3V3zm6 0h2v2H9V3zm-3 0h2v2H6V3zm-3 5h2v2H3V8zm6 0h2v2H9V8zm-3 0h2v2H6V8zm-3 5h2v2H3v-2zm6 0h2v2H9v-2zm-3 0h2v2H6v-2z"/></svg>
+      工作台
+    </div>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-item active">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.5 2.5a.5.5 0 00-1 0v5.793L5.354 6.146a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 8.293V2.5z"/><path d="M3.5 9.5a.5.5 0 00-1 0v3A1.5 1.5 0 004 14h8a1.5 1.5 0 001.5-1.5v-3a.5.5 0 00-1 0v3a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5v-3z"/></svg>
+      视频生成
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 1a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H1a1 1 0 01-1-1V1zm4 0v6h8V1H4zM3 8h2v2H3V8zm0 3h2v2H3v-2zm3-3h2v2H6V8zm0 3h2v2H6v-2zm3-3h2v2H9V8zm0 3h2v2H9v-2zm3-3h2v2h-2V8zm0 3h2v2h-2v-2z"/></svg>
+      数字人管理
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 13A6 6 0 118 2a6 6 0 010 12z"/><path d="M8 4a.5.5 0 01.5.5v3.5h2a.5.5 0 010 1h-2.5a.5.5 0 01-.5-.5V4.5A.5.5 0 018 4z"/></svg>
+      音频合成
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.5 1a.5.5 0 00-.5.5v6.293L5.354 6.146a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 7.793V1.5a.5.5 0 00-.5-.5z"/><path d="M3.5 9a.5.5 0 00-.5.5v3A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5v-3a.5.5 0 00-1 0v3a.5.5 0 01-.5.5h-7a.5.5 0 01-.5-.5v-3a.5.5 0 00-.5-.5z"/></svg>
+      字幕生成
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3a3 3 0 00-3 3v6a3 3 0 003 3h6a3 3 0 003-3V6a3 3 0 00-3-3H5zm1.5 2.5a.5.5 0 01.5-.5h2a.5.5 0 010 1H7a.5.5 0 01-.5-.5zM5 8a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5A.5.5 0 015 8zm.5 3a.5.5 0 000 1h3a.5.5 0 000-1h-3z"/></svg>
+      数据审核
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 13A6 6 0 118 2a6 6 0 010 12zm-.5-7.5a.5.5 0 011 0v3a.5.5 0 01-1 0V6.5zm0-2.5a.5.5 0 011 0v1a.5.5 0 01-1 0V4z"/></svg>
+      举报与反馈
+    </div>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a5 5 0 100 10A5 5 0 008 2zm0 9a4 4 0 110-8 4 4 0 010 8z"/><path d="M8 4a.5.5 0 01.5.5v3.5h2a.5.5 0 010 1h-2.5a.5.5 0 01-.5-.5V4.5A.5.5 0 018 4z"/></svg>
+      系统设置
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.65-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.691-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 000 2.5v11a.5.5 0 00.707.455c.882-.4 2.303-.88 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 00.78 0c.633-.79 1.814-1.019 3.222-.877 1.378.14 2.8.62 3.681 1.02A.5.5 0 0016 13.5v-11a.5.5 0 00-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg>
+      帮助文档
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 00-2 2v4a2 2 0 002 2V7a2 2 0 00-2-2V4a3 3 0 013-3h2a3 3 0 013 3v1a2 2 0 00-2 2v1a2 2 0 002 2v1a2 2 0 01-2 2v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1a2 2 0 002-2v-1a2 2 0 00-2-2V4a2 2 0 012-2h2a2 2 0 012 2v1a2 2 0 00-2 2v1a2 2 0 002 2v1z"/></svg>
+      隐私政策
+    </div>
+    <div class="sidebar-item">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 00-2 2v4a2 2 0 002 2V7a2 2 0 00-2-2V4a3 3 0 013-3h2a3 3 0 013 3v1a2 2 0 00-2 2v1a2 2 0 002 2v1a2 2 0 01-2 2v1a3 3 0 01-3 3H9a3 3 0 01-3-3v-1a2 2 0 002-2v-1a2 2 0 00-2-2V4a2 2 0 012-2h2a2 2 0 012 2v1a2 2 0 00-2 2v1a2 2 0 002 2v1z"/></svg>
+      用户协议
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="content">
+    <h1 class="page-title">视频生成</h1>
+    <p class="page-desc">选择模板，输入文案，配置数字人与声线，一键生成文博宣传短视频</p>
+
+    <!-- 步骤条 -->
+    <div class="step-bar">
+      <div class="step active" id="step1-indicator">
+        <span class="step-num">1</span>
+        <span>选择模板</span>
+      </div>
+      <span class="step-arrow">→</span>
+      <div class="step pending" id="step2-indicator">
+        <span class="step-num">2</span>
+        <span>输入文案</span>
+      </div>
+      <span class="step-arrow">→</span>
+      <div class="step pending" id="step3-indicator">
+        <span class="step-num">3</span>
+        <span>配置数字人</span>
+      </div>
+      <span class="step-arrow">→</span>
+      <div class="step pending" id="step4-indicator">
+        <span class="step-num">4</span>
+        <span>生成视频</span>
+      </div>
+    </div>
+
+    <!-- 步骤1：选择模板 -->
+    <div id="step1" class="panel">
+      <div class="panel-title">🎬 选择视频模板</div>
+      <div class="template-grid">
+        <div class="template-card" data-template="museum" onclick="selectTemplate(this)">
+          <div class="template-preview">🏛</div>
+          <div class="template-name">博物馆导览</div>
+          <div class="template-desc">展厅环境 + 数字人讲解，适合博物馆宣传</div>
+        </div>
+        <div class="template-card" data-template="artifact" onclick="selectTemplate(this)">
+          <div class="template-preview">🏺</div>
+          <div class="template-name">文物讲解</div>
+          <div class="template-desc">文物特写 + 历史背景介绍，适合单品宣传</div>
+        </div>
+        <div class="template-card" data-template="science" onclick="selectTemplate(this)">
+          <div class="template-preview">📚</div>
+          <div class="template-name">科普短片</div>
+          <div class="template-desc">知识科普 + 动画演示，适合教育传播</div>
+        </div>
+        <div class="template-card" data-template="exhibition" onclick="selectTemplate(this)">
+          <div class="template-preview">🎨</div>
+          <div class="template-name">展览预告</div>
+          <div class="template-desc">特展预告 + 亮点展示，适合活动预热</div>
+        </div>
+        <div class="template-card" data-template="digital" onclick="selectTemplate(this)">
+          <div class="template-preview">👤</div>
+          <div class="template-name">数字人播报</div>
+          <div class="template-desc">纯数字人出镜 + 新闻播报风格</div>
+        </div>
+        <div class="template-card" data-template="story" onclick="selectTemplate(this)">
+          <div class="template-preview">📖</div>
+          <div class="template-name">历史故事</div>
+          <div class="template-desc">场景还原 + 叙事讲解，适合故事化传播</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步骤2：输入文案 -->
+    <div id="step2" class="panel hidden">
+      <div class="panel-title">📝 输入讲解文案</div>
+      <div class="script-toolbar">
+        <button class="tool-btn" onclick="loadExample()">📋 加载示例文案</button>
+        <button class="tool-btn" onclick="clearScript()">🗑 清空</button>
+        <button class="tool-btn" onclick="aiPolish()">✨ AI润色</button>
+      </div>
+      <textarea class="script-input" id="scriptText" placeholder="请输入讲解文案，建议300-3000字...
+
+示例：
+各位观众大家好，欢迎来到青铜器展厅。现在为您讲解的是西周时期的青铜鼎。这件文物高32厘米，口径28厘米，鼎身纹饰精美，体现了当时高超的铸造工艺...">各位观众大家好，欢迎来到青铜器展厅。现在为您讲解的是西周时期的青铜鼎。这件文物高32厘米，口径28厘米，鼎身纹饰精美，体现了当时高超的铸造工艺。三足鼎立的造型象征着稳固与威严，是西周礼器中的精品。</textarea>
+      <div style="text-align:right; margin-top:8px; font-size:12px; color:var(--text-secondary);">已输入 <span id="charCount">96</span> 字</div>
+    </div>
+
+    <!-- 步骤3：配置数字人 -->
+    <div id="step3" class="panel hidden">
+      <div class="panel-title">👤 选择数字人形象</div>
+      <div class="avatar-grid" id="avatarGrid">
+        <div class="avatar-card selected" data-avatar="docent-f" onclick="selectAvatar(this)">
+          <div class="avatar-img">👩‍🏫</div>
+          <div class="avatar-name">文博-晓雅</div>
+          <div class="avatar-tag">女讲解员 · 专业亲切</div>
+        </div>
+        <div class="avatar-card" data-avatar="docent-m" onclick="selectAvatar(this)">
+          <div class="avatar-img">👨‍🏫</div>
+          <div class="avatar-name">文博-文博</div>
+          <div class="avatar-tag">男讲解员 · 沉稳大气</div>
+        </div>
+        <div class="avatar-card" data-avatar="youth-f" onclick="selectAvatar(this)">
+          <div class="avatar-img">👩‍🎓</div>
+          <div class="avatar-name">文博-小希</div>
+          <div class="avatar-tag">女青年 · 活泼清新</div>
+        </div>
+        <div class="avatar-card" data-avatar="youth-m" onclick="selectAvatar(this)">
+          <div class="avatar-img">👨‍🎓</div>
+          <div class="avatar-name">文博-小杰</div>
+          <div class="avatar-tag">男青年 · 阳光热情</div>
+        </div>
+      </div>
+
+      <div class="panel-title" style="margin-top:28px;">🔊 选择配音声线</div>
+      <div class="voice-list" id="voiceList">
+        <div class="voice-item selected" data-voice="female-docent" onclick="selectVoice(this)">
+          <div class="voice-icon">🎙</div>
+          <div class="voice-info">
+            <div class="voice-name">讲解员-女声</div>
+            <div class="voice-desc">专业播音腔，适合正式讲解场景</div>
+          </div>
+          <button class="voice-play" onclick="event.stopPropagation();playDemo(this)">▶ 试听</button>
+        </div>
+        <div class="voice-item" data-voice="male-docent" onclick="selectVoice(this)">
+          <div class="voice-icon">🎙</div>
+          <div class="voice-info">
+            <div class="voice-name">讲解员-男声</div>
+            <div class="voice-desc">浑厚稳重，适合历史类深度讲解</div>
+          </div>
+          <button class="voice-play" onclick="event.stopPropagation();playDemo(this)">▶ 试听</button>
+        </div>
+        <div class="voice-item" data-voice="female-gentle" onclick="selectVoice(this)">
+          <div class="voice-icon">🎙</div>
+          <div class="voice-info">
+            <div class="voice-name">温柔女声</div>
+            <div class="voice-desc">柔和亲切，适合科普与故事类内容</div>
+          </div>
+          <button class="voice-play" onclick="event.stopPropagation();playDemo(this)">▶ 试听</button>
+        </div>
+        <div class="voice-item" data-voice="male-energetic" onclick="selectVoice(this)">
+          <div class="voice-icon">🎙</div>
+          <div class="voice-info">
+            <div class="voice-name">活力男声</div>
+            <div class="voice-desc">热情明快，适合活动预告与展览推广</div>
+          </div>
+          <button class="voice-play" onclick="event.stopPropagation();playDemo(this)">▶ 试听</button>
+        </div>
+      </div>
+
+      <div class="config-row" style="margin-top:20px;">
+        <div class="config-item">
+          <div class="config-label">语速</div>
+          <select class="config-select" id="speedSelect">
+            <option value="0.8">0.8x 慢速</option>
+            <option value="1.0" selected>1.0x 标准</option>
+            <option value="1.2">1.2x 快速</option>
+            <option value="1.5">1.5x 较快</option>
+          </select>
+        </div>
+        <div class="config-item">
+          <div class="config-label">情感风格</div>
+          <select class="config-select" id="emotionSelect">
+            <option value="professional" selected>专业/正式</option>
+            <option value="friendly">亲切/友好</option>
+            <option value="enthusiastic">热情/激昂</option>
+            <option value="calm">沉稳/平和</option>
+          </select>
+        </div>
+        <div class="config-item">
+          <div class="config-label">视频分辨率</div>
+          <select class="config-select" id="resolutionSelect">
+            <option value="1080p" selected>1920×1080 (横屏)</option>
+            <option value="1920v">1080×1920 (竖屏)</option>
+            <option value="4k">3840×2160 (4K)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步骤4：生成进度 -->
+    <div id="step4" class="panel progress-panel">
+      <div class="progress-ring">
+        <svg width="120" height="120">
+          <circle class="progress-ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="progress-ring-fill" id="progressCircle" cx="60" cy="60" r="52" 
+            stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+        </svg>
+        <div class="progress-text" id="progressText">0%</div>
+      </div>
+      <div class="progress-label" id="progressLabel">正在生成视频...</div>
+      <div class="progress-detail" id="progressDetail">初始化中</div>
+      <div class="progress-log" id="progressLog"></div>
+    </div>
+
+    <!-- 结果预览 -->
+    <div id="result" class="panel result-panel">
+      <div class="panel-title">🎉 视频生成完成</div>
+      <div class="video-player">
+        <div class="video-screen" id="videoScreen">
+          <div class="play-btn" onclick="togglePlay()">▶</div>
+          <div class="watermark">AI生成 · 深度合成</div>
+        </div>
+        <div class="video-controls">
+          <button onclick="togglePlay()" style="background:none;border:none;color:var(--text-primary);cursor:pointer;font-size:14px;">▶</button>
+          <div class="video-progress" onclick="seekVideo(event)">
+            <div class="video-progress-fill" id="videoProgress"></div>
+          </div>
+          <span class="video-time" id="videoTime">00:00 / 02:36</span>
+        </div>
+      </div>
+      <div style="text-align:center; margin-bottom:20px; font-size:13px; color:var(--text-secondary);">
+        WB-20250708-006 · 博物馆青铜器导览 · 02:36 · 486 MB
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-primary" onclick="downloadVideo()">💾 下载视频</button>
+        <button class="btn btn-primary" style="background:var(--green);" onclick="downloadSubtitle()">📝 下载字幕</button>
+        <button class="btn btn-secondary" onclick="regenerate()">🔄 重新生成</button>
+        <button class="btn btn-secondary" onclick="location.href='audit.html'">🔍 提交审核</button>
+      </div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="bottom-bar" id="bottomBar">
+      <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()">← 上一步</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">下一步 →</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  let currentStep = 1;
+  let selectedTemplate = 'museum';
+  let selectedAvatar = 'docent-f';
+  let selectedVoice = 'female-docent';
+  let isPlaying = false;
+  let playInterval = null;
+
+  // 步骤切换
+  function updateSteps() {
+    for (let i = 1; i <= 4; i++) {
+      const indicator = document.getElementById('step' + i + '-indicator');
+      const panel = document.getElementById('step' + i);
+      if (i < currentStep) {
+        indicator.className = 'step done';
+        if (panel) panel.classList.add('hidden');
+      } else if (i === currentStep) {
+        indicator.className = 'step active';
+        if (panel) panel.classList.remove('hidden');
+      } else {
+        indicator.className = 'step pending';
+        if (panel) panel.classList.add('hidden');
+      }
+    }
+    document.getElementById('step4').classList.remove('active');
+    document.getElementById('result').classList.remove('active');
+    document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+    const nextBtn = document.getElementById('nextBtn');
+    if (currentStep === 4) {
+      nextBtn.textContent = '开始生成 🚀';
+    } else {
+      nextBtn.textContent = '下一步 →';
+    }
+  }
+
+  function nextStep() {
+    if (currentStep < 4) {
+      currentStep++;
+      updateSteps();
+    } else {
+      startGeneration();
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 1) {
+      currentStep--;
+      updateSteps();
+    }
+  }
+
+  // 模板选择
+  function selectTemplate(el) {
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedTemplate = el.dataset.template;
+  }
+
+  // 数字人选择
+  function selectAvatar(el) {
+    document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedAvatar = el.dataset.avatar;
+  }
+
+  // 声线选择
+  function selectVoice(el) {
+    document.querySelectorAll('.voice-item').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedVoice = el.dataset.voice;
+  }
+
+  // 试听演示
+  function playDemo(btn) {
+    const original = btn.textContent;
+    btn.textContent = '🔊 播放中...';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+  }
+
+  // 文案工具
+  function loadExample() {
+    const example = `各位观众大家好，欢迎来到青铜器展厅。现在为您讲解的是西周时期的青铜鼎。
+
+这件文物高32厘米，口径28厘米，鼎身纹饰精美，体现了当时高超的铸造工艺。三足鼎立的造型象征着稳固与威严，是西周礼器中的精品。
+
+鼎身饕餮纹清晰可见，线条流畅，工艺精湛。据考证，这件青铜鼎出土于陕西宝鸡，距今已有2800多年历史。
+
+希望通过今天的讲解，能让大家对西周青铜文化有更深入的了解。`;
+    document.getElementById('scriptText').value = example;
+    updateCharCount();
+  }
+
+  function clearScript() {
+    document.getElementById('scriptText').value = '';
+    updateCharCount();
+  }
+
+  function aiPolish() {
+    const btn = event.target;
+    const original = btn.textContent;
+    btn.textContent = '✨ 润色中...';
+    setTimeout(() => {
+      btn.textContent = original;
+      alert('文案润色完成！已优化用词与句式结构。');
+    }, 1500);
+  }
+
+  function updateCharCount() {
+    const len = document.getElementById('scriptText').value.length;
+    document.getElementById('charCount').textContent = len;
+  }
+
+  document.getElementById('scriptText').addEventListener('input', updateCharCount);
+
+  // 视频生成
+  function startGeneration() {
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('step4').classList.add('active');
+    document.getElementById('bottomBar').style.display = 'none';
+    document.querySelector('.step-bar').style.display = 'none';
+
+    const logs = [
+      '[14:32:01] 开始初始化生成任务...',
+      '[14:32:02] 加载数字人模型: Avatar-V1.2 (文博-晓雅)',
+      '[14:32:03] 加载声线模型: TTS-V3.0 (讲解员-女声)',
+      '[14:32:04] 文案分句与语义分析完成',
+      '[14:32:06] 开始语音合成...',
+      '[14:32:15] 语音合成完成，时长 02:36',
+      '[14:32:16] 开始唇形同步计算...',
+      '[14:32:25] 唇形同步完成，匹配度 98.7%',
+      '[14:32:26] 开始视频画面渲染...',
+      '[14:32:45] 展厅背景渲染完成',
+      '[14:33:02] 数字人动画合成完成',
+      '[14:33:10] 字幕同步生成完成',
+      '[14:33:15] 视频编码中 (H.264/AAC)...',
+      '[14:33:28] 视频编码完成',
+      '[14:33:29] 嵌入AIGC溯源元数据...',
+      '[14:33:30] 添加AI生成水印...',
+      '[14:33:31] ✅ 视频生成完成！',
+    ];
+
+    let progress = 0;
+    let logIndex = 0;
+    const circle = document.getElementById('progressCircle');
+    const text = document.getElementById('progressText');
+    const label = document.getElementById('progressLabel');
+    const detail = document.getElementById('progressDetail');
+    const logPanel = document.getElementById('progressLog');
+    const circumference = 326.73;
+
+    function addLog(msg) {
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      line.textContent = msg;
+      logPanel.appendChild(line);
+      logPanel.scrollTop = logPanel.scrollHeight;
+    }
+
+    const interval = setInterval(() => {
+      progress += Math.random() * 3 + 1;
+      if (progress > 100) progress = 100;
+
+      const offset = circumference - (progress / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      text.textContent = Math.floor(progress) + '%';
+
+      if (logIndex < logs.length && progress > (logIndex / logs.length) * 100) {
+        addLog(logs[logIndex]);
+        detail.textContent = logs[logIndex].replace(/^\[.*?\]\s*/, '');
+        logIndex++;
+      }
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(showResult, 800);
+      }
+    }, 200);
+  }
+
+  function showResult() {
+    document.getElementById('step4').classList.remove('active');
+    document.getElementById('result').classList.add('active');
+  }
+
+  // 视频播放模拟
+  function togglePlay() {
+    const screen = document.getElementById('videoScreen');
+    const btn = screen.querySelector('.play-btn');
+    const progress = document.getElementById('videoProgress');
+    const time = document.getElementById('videoTime');
+
+    if (isPlaying) {
+      isPlaying = false;
+      btn.textContent = '▶';
+      clearInterval(playInterval);
+    } else {
+      isPlaying = true;
+      btn.textContent = '⏸';
+      btn.style.opacity = '0';
+      let p = parseFloat(progress.style.width) || 0;
+      playInterval = setInterval(() => {
+        p += 0.5;
+        if (p > 100) { p = 0; isPlaying = false; btn.textContent = '▶'; btn.style.opacity = '1'; clearInterval(playInterval); }
+        progress.style.width = p + '%';
+        const total = 156; // 2:36 in seconds
+        const current = Math.floor((p / 100) * total);
+        const curMin = String(Math.floor(current / 60)).padStart(2, '0');
+        const curSec = String(current % 60).padStart(2, '0');
+        time.textContent = `${curMin}:${curSec} / 02:36`;
+      }, 100);
+    }
+  }
+
+  function seekVideo(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = (x / rect.width) * 100;
+    document.getElementById('videoProgress').style.width = pct + '%';
+  }
+
+  function downloadVideo() {
+    alert('📥 开始下载视频文件：WB-20250708-006.mp4 (486 MB)');
+  }
+
+  function downloadSubtitle() {
+    alert('📥 开始下载字幕文件：WB-20250708-006.srt');
+  }
+
+  function regenerate() {
+    currentStep = 1;
+    document.querySelector('.step-bar').style.display = 'flex';
+    document.getElementById('bottomBar').style.display = 'flex';
+    document.getElementById('result').classList.remove('active');
+    document.getElementById('progressLog').innerHTML = '';
+    document.getElementById('progressCircle').style.strokeDashoffset = '326.73';
+    document.getElementById('progressText').textContent = '0%';
+    updateSteps();
+  }
+
+  // 初始化
+  updateSteps();
+</script>
+
+</body>
+</html>
