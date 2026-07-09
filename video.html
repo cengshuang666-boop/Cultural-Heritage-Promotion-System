@@ -418,7 +418,7 @@
         </div>
       </div>
       <div style="text-align:center; margin-bottom:20px; font-size:13px; color:var(--text-secondary);">
-        WB-20250708-006 · 博物馆青铜器导览 · 02:36 · 486 MB
+        WB-20260708-006 · 博物馆青铜器导览 · 02:36 · 486 MB
       </div>
       <div class="result-actions">
         <button class="btn btn-primary" onclick="downloadVideo()">💾 下载视频</button>
@@ -627,13 +627,13 @@
 
     // 读取已有数据
     let items = JSON.parse(localStorage.getItem('wenbo_audit_items') || '[]');
-    let maxSeq = 7; // 已有最大 WB-20250708-007
+    let maxSeq = 7; // 已有最大 WB-20260708-007
     items.forEach(it => {
-      const m = it.id.match(/WB-20250709-(\d+)/);
+      const m = it.id.match(/WB-20260709-(\d+)/);
       if (m) maxSeq = Math.max(maxSeq, parseInt(m[1]));
     });
     const newSeq = String(maxSeq + 1).padStart(3, '0');
-    const id = 'WB-20250709-' + newSeq;
+    const id = 'WB-20260709-' + newSeq;
 
     const now = new Date();
     const time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -643,7 +643,7 @@
       title: title,
       type: type,
       status: 'pending',
-      date: '2025-07-09',
+      date: '2026-07-09',
       time: time,
       source: 'video'
     };
@@ -687,11 +687,11 @@
   }
 
   function downloadVideo() {
-    alert('📥 开始下载视频文件：WB-20250708-006.mp4 (486 MB)');
+    alert('📥 开始下载视频文件：WB-20260708-006.mp4 (486 MB)');
   }
 
   function downloadSubtitle() {
-    alert('📥 开始下载字幕文件：WB-20250708-006.srt');
+    alert('📥 开始下载字幕文件：WB-20260708-006.srt');
   }
 
   function regenerate() {
