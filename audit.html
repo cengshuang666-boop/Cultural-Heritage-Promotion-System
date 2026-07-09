@@ -495,9 +495,9 @@
       if (status !== 'all' && rowStatus !== status) show = false;
       if (type !== 'all' && rowType !== type) show = false;
       if (date !== 'all') {
-        if (date === 'today' && rowDate !== '2025-07-08') show = false;
-        if (date === 'week' && (rowDate < '2025-07-01' || rowDate > '2025-07-08')) show = false;
-        if (date === 'month' && (rowDate < '2025-06-08' || rowDate > '2025-07-08')) show = false;
+        if (date === 'today' && rowDate !== '2025-07-08' && rowDate !== '2025-07-09') show = false;
+        if (date === 'week' && (rowDate < '2025-07-01' || rowDate > '2025-07-09')) show = false;
+        if (date === 'month' && (rowDate < '2025-06-09' || rowDate > '2025-07-09')) show = false;
       }
       row.classList.toggle('hidden', !show);
     });
@@ -677,6 +677,33 @@
       if (e.target === overlay) overlay.classList.remove('active');
     });
   });
+
+  // 从 video.html 加载新生成的审核条目
+  function loadAuditItems() {
+    const items = JSON.parse(localStorage.getItem('wenbo_audit_items') || '[]');
+    const tbody = document.getElementById('auditTable');
+    // 过滤掉已渲染的（通过 data-source 标记）
+    const existingIds = new Set([...tbody.querySelectorAll('tr')].map(r => r.querySelector('td:nth-child(2)')?.textContent).filter(Boolean));
+    items.forEach(item => {
+      if (existingIds.has(item.id)) return;
+      const tr = document.createElement('tr');
+      tr.dataset.status = item.status;
+      tr.dataset.type = item.type;
+      tr.dataset.date = item.date;
+      tr.dataset.source = item.source || 'video';
+      tr.innerHTML = `<td><input type="checkbox" class="checkbox row-check"></td>
+        <td>${item.id}</td>
+        <td>${item.title}</td>
+        <td><span class="tag tag-blue">${item.type}</span></td>
+        <td><span class="tag tag-yellow status-cell">审核中</span></td>
+        <td>${item.time}</td>
+        <td><button class="btn btn-primary btn-sm" onclick="openAudit('${item.id}', '${item.title}')">审核</button></td>`;
+      tbody.insertBefore(tr, tbody.firstChild);
+    });
+    updateStats();
+  }
+
+  loadAuditItems();
 </script>
 
 </body>

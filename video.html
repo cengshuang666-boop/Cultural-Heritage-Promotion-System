@@ -613,6 +613,42 @@
   function showResult() {
     document.getElementById('step4').classList.remove('active');
     document.getElementById('result').classList.add('active');
+    saveToAudit();
+  }
+
+  function saveToAudit() {
+    const templateNames = {
+      'museum': '博物馆导览', 'artifact': '文物讲解', 'science': '科普短片',
+      'exhibition': '展览预告', 'digital': '数字人播报', 'story': '历史故事'
+    };
+    const script = document.getElementById('scriptText').value.trim();
+    const title = script ? (script.slice(0, 10).replace(/\n/g, '') + '…') : '未命名视频';
+    const type = templateNames[selectedTemplate] || '科普短片';
+
+    // 读取已有数据
+    let items = JSON.parse(localStorage.getItem('wenbo_audit_items') || '[]');
+    let maxSeq = 7; // 已有最大 WB-20250708-007
+    items.forEach(it => {
+      const m = it.id.match(/WB-20250709-(\d+)/);
+      if (m) maxSeq = Math.max(maxSeq, parseInt(m[1]));
+    });
+    const newSeq = String(maxSeq + 1).padStart(3, '0');
+    const id = 'WB-20250709-' + newSeq;
+
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+    const item = {
+      id: id,
+      title: title,
+      type: type,
+      status: 'pending',
+      date: '2025-07-09',
+      time: time,
+      source: 'video'
+    };
+    items.push(item);
+    localStorage.setItem('wenbo_audit_items', JSON.stringify(items));
   }
 
   function togglePlay() {
