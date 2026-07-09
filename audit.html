@@ -241,7 +241,7 @@
                 <td><span class="tag tag-blue">科普短片</span></td>
                 <td><span class="tag tag-yellow status-cell">审核中</span></td>
                 <td>08:45</td>
-                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20260708-003', '宋代书画科普')">审核</button></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20260708-003', '宋代书画科普')">审核</button><a href="quality.html?id=WB-20260708-003" class="btn btn-sm" style="background:var(--bg-hover);color:var(--accent-hover);border:1px solid var(--border);margin-left:6px;text-decoration:none;">📊 质量</a></td>
               </tr>
               <tr data-status="pending" data-type="文物讲解" data-date="2026-07-08">
                 <td><input type="checkbox" class="checkbox row-check"></td>
@@ -250,7 +250,7 @@
                 <td><span class="tag tag-blue">文物讲解</span></td>
                 <td><span class="tag tag-yellow status-cell">审核中</span></td>
                 <td>08:30</td>
-                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20260708-006', '汉代玉器鉴赏')">审核</button></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20260708-006', '汉代玉器鉴赏')">审核</button><a href="quality.html?id=WB-20260708-006" class="btn btn-sm" style="background:var(--bg-hover);color:var(--accent-hover);border:1px solid var(--border);margin-left:6px;text-decoration:none;">📊 质量</a></td>
               </tr>
               <tr data-status="pending" data-type="展览预告" data-date="2026-07-08">
                 <td><input type="checkbox" class="checkbox row-check"></td>
@@ -259,7 +259,7 @@
                 <td><span class="tag tag-blue">展览预告</span></td>
                 <td><span class="tag tag-yellow status-cell">审核中</span></td>
                 <td>07:55</td>
-                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20260708-007', '陶瓷艺术展预告')">审核</button></td>
+                <td><button class="btn btn-primary btn-sm" onclick="openAudit('WB-20260708-007', '陶瓷艺术展预告')">审核</button><a href="quality.html?id=WB-20260708-007" class="btn btn-sm" style="background:var(--bg-hover);color:var(--accent-hover);border:1px solid var(--border);margin-left:6px;text-decoration:none;">📊 质量</a></td>
               </tr>
               <tr data-status="approved" data-type="博物馆导览" data-date="2026-07-08">
                 <td><input type="checkbox" class="checkbox row-check"></td>
@@ -691,7 +691,7 @@
       tr.dataset.type = item.type;
       tr.dataset.date = item.date;
       tr.dataset.source = item.source || 'video';
-      let actionCell = `<td><button class="btn btn-primary btn-sm" onclick="openAudit('${item.id}', '${item.title}')">审核</button></td>`;
+      let actionCell = `<td><button class="btn btn-primary btn-sm" onclick="openAudit('${item.id}', '${item.title}')">审核</button><a href="quality.html?id=${item.id}" class="btn btn-sm" style="background:var(--bg-hover);color:var(--accent-hover);border:1px solid var(--border);margin-left:6px;text-decoration:none;">📊 质量</a></td>`;
       if (item.status !== 'pending') {
         const statusText = item.status === 'approved' ? '已通过' : '已驳回';
         const statusClass = item.status === 'approved' ? 'tag-green' : 'tag-red';

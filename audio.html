@@ -162,6 +162,7 @@
 
     <div class="panel">
       <div class="panel-title">📝 输入文案</div>
+      <input type="text" id="contentTitle" placeholder="请输入内容标题（可选）" style="width:100%; padding:10px 14px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:14px; margin-bottom:12px; outline:none; font-family:inherit;">
       <textarea class="textarea" id="inputText" placeholder="请输入需要转换为语音的文案...">各位观众大家好，欢迎来到青铜器展厅。现在为您讲解的是西周时期的青铜鼎。这件文物高32厘米，口径28厘米，鼎身纹饰精美，体现了当时高超的铸造工艺。</textarea>
       <div style="text-align:right; margin-top:8px; font-size:12px; color:var(--text-secondary);">已输入 <span id="charCount">76</span> 字</div>
     </div>
@@ -345,8 +346,9 @@
   }
 
   function saveToAudit() {
+    const customTitle = document.getElementById('contentTitle').value.trim();
     const text = document.getElementById('inputText').value.trim();
-    const title = text ? (text.slice(0, 10).replace(/\n/g, '') + '…') : '未命名音频';
+    const title = customTitle || (text ? (text.slice(0, 10).replace(/\n/g, '') + '…') : '未命名音频');
     const voiceEl = document.querySelector('.voice-item.selected');
     const voiceName = voiceEl ? voiceEl.querySelector('.voice-name').textContent : '讲解员-女声';
 

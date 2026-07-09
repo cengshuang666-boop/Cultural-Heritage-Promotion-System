@@ -287,6 +287,7 @@
         <button class="tool-btn" onclick="clearScript()">🗑 清空</button>
         <button class="tool-btn" onclick="aiPolish()">✨ AI润色</button>
       </div>
+      <input type="text" id="contentTitle" placeholder="请输入视频标题（可选）" style="width:100%; padding:10px 14px; background:var(--bg-hover); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:14px; margin-bottom:12px; outline:none; font-family:inherit;">
       <textarea class="script-input" id="scriptText" placeholder="请输入讲解文案，建议300-3000字...
 
 示例：
@@ -621,8 +622,9 @@
       'museum': '博物馆导览', 'artifact': '文物讲解', 'science': '科普短片',
       'exhibition': '展览预告', 'digital': '数字人播报', 'story': '历史故事'
     };
+    const customTitle = document.getElementById('contentTitle').value.trim();
     const script = document.getElementById('scriptText').value.trim();
-    const title = script ? (script.slice(0, 10).replace(/\n/g, '') + '…') : '未命名视频';
+    const title = customTitle || (script ? (script.slice(0, 10).replace(/\n/g, '') + '…') : '未命名视频');
     const type = templateNames[selectedTemplate] || '科普短片';
 
     // 读取已有数据
