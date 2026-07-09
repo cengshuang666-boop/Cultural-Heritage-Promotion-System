@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文博AI宣传视频平台 - 字幕生成</title>
+  <style>
+    :root {
+      --bg-deep: #0d1117; --bg-card: #161b22; --bg-hover: #21262d; --border: #30363d;
+      --text-primary: #c9d1d9; --text-secondary: #8b949e; --accent: #2f81f7; --accent-hover: #58a6ff;
+      --green: #238636; --green-text: #3fb950; --red: #da3633; --yellow: #9e8c00; --tag-bg: rgba(47,129,247,0.15);
+      --sidebar-active: rgba(47,129,247,0.12);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,"Noto Sans SC",sans-serif; background:var(--bg-deep); color:var(--text-primary); font-size:14px; }
+    a { text-decoration:none; color:inherit; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:56px; background:var(--bg-card); border-bottom:1px solid var(--border); position:fixed; top:0; left:0; right:0; z-index:100; }
+    .topbar-left { display:flex; align-items:center; gap:32px; }
+    .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:600; }
+    .logo-icon { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+    .topnav { display:flex; gap:28px; }
+    .topnav a { font-size:14px; color:var(--text-secondary); padding:18px 0; border-bottom:2px solid transparent; transition:.2s; }
+    .topnav a:hover, .topnav a.active { color:var(--text-primary); border-bottom-color:var(--accent); }
+    .topbar-right { display:flex; align-items:center; gap:12px; color:var(--text-secondary); font-size:13px; }
+    .user-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:12px; }
+
+    .sidebar { position:fixed; top:56px; left:0; width:210px; height:calc(100vh - 56px); background:var(--bg-card); border-right:1px solid var(--border); overflow-y:auto; z-index:90; }
+    .sidebar-group { padding:12px 0; border-bottom:1px solid var(--border); }
+    .sidebar-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:13px; color:var(--text-secondary); cursor:pointer; transition:.15s; }
+    .sidebar-item:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .sidebar-item.active { background:var(--sidebar-active); color:var(--accent-hover); border-left:3px solid var(--accent); padding-left:17px; }
+    .sidebar-item svg { width:16px; height:16px; flex-shrink:0; }
+
+    .main { margin-left:210px; margin-top:56px; padding:24px; min-height:calc(100vh - 56px); }
+    .content { max-width:900px; margin:0 auto; }
+
+    .page-title { font-size:22px; font-weight:600; margin-bottom:4px; }
+    .page-desc { color:var(--text-secondary); font-size:13px; margin-bottom:24px; }
+
+    .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:20px; }
+    .panel-title { font-size:16px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
+
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border-radius:8px; font-size:13px; cursor:pointer; border:none; transition:.15s; font-weight:500; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-primary:hover { background:var(--accent-hover); }
+    .btn-secondary { background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border); }
+    .btn-secondary:hover { background:var(--border); }
+    .btn-sm { padding:6px 14px; font-size:12px; }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    .upload-area { border:2px dashed var(--border); border-radius:12px; padding:40px; text-align:center; cursor:pointer; transition:.2s; background:var(--bg-hover); }
+    .upload-area:hover { border-color:var(--accent); background:rgba(47,129,247,0.04); }
+    .upload-area.dragover { border-color:var(--accent); background:rgba(47,129,247,0.08); }
+    .upload-icon { font-size:36px; margin-bottom:12px; }
+    .upload-text { font-size:14px; font-weight:500; margin-bottom:6px; }
+    .upload-hint { font-size:12px; color:var(--text-secondary); }
+
+    .file-info { display:flex; align-items:center; gap:12px; padding:14px; background:var(--bg-hover); border-radius:8px; margin-top:16px; }
+    .file-icon { width:40px; height:40px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .file-detail { flex:1; }
+    .file-name { font-size:14px; font-weight:500; }
+    .file-meta { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+    .file-remove { padding:4px 8px; background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--text-secondary); font-size:12px; cursor:pointer; }
+
+    .textarea { width:100%; min-height:120px; background:var(--bg-hover); border:1px solid var(--border); border-radius:8px; padding:14px; color:var(--text-primary); font-size:14px; font-family:inherit; resize:vertical; outline:none; }
+    .textarea:focus { border-color:var(--accent); }
+    .textarea::placeholder { color:var(--text-secondary); }
+
+    .config-row { display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:16px; }
+    .config-item { background:var(--bg-hover); border-radius:8px; padding:14px; }
+    .config-label { font-size:12px; color:var(--text-secondary); margin-bottom:8px; }
+    .config-select { width:100%; padding:8px 12px; background:var(--bg-deep); border:1px solid var(--border); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none; cursor:pointer; }
+    .config-select:focus { border-color:var(--accent); }
+
+    .progress-area { display:none; padding:30px 0; text-align:center; }
+    .progress-area.active { display:block; }
+    .progress-bar { width:100%; max-width:400px; height:8px; background:var(--bg-hover); border-radius:4px; margin:0 auto 16px; overflow:hidden; }
+    .progress-fill { height:100%; width:0%; background:var(--accent); border-radius:4px; transition:width 0.3s; }
+    .progress-text { font-size:14px; color:var(--text-secondary); }
+    .progress-detail { font-size:12px; color:var(--text-secondary); margin-top:6px; }
+
+    .result-area { display:none; }
+    .result-area.active { display:block; }
+    .subtitle-preview { background:var(--bg-deep); border-radius:8px; padding:16px; font-family:monospace; font-size:13px; line-height:1.8; max-height:320px; overflow-y:auto; color:var(--text-secondary); }
+    .subtitle-entry { margin-bottom:8px; padding:8px; background:var(--bg-hover); border-radius:6px; border-left:3px solid var(--accent); }
+    .subtitle-time { font-size:11px; color:var(--accent-hover); margin-bottom:2px; }
+    .subtitle-text { color:var(--text-primary); }
+
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">
+      <div class="logo-icon">🏛</div>
+      文博AI宣传视频平台
+    </div>
+    <nav class="topnav">
+      <a href="index.html">首页</a>
+      <a href="video.html">视频生成</a>
+      <a href="audit.html">数据审核</a>
+      <a href="avatar.html">数字人管理</a>
+      <a href="audio.html">音频合成</a>
+      <a href="subtitle.html" class="active">字幕生成</a>
+      <a href="quality.html">质量评价</a>
+      <a href="report.html">举报反馈</a>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <div class="user-avatar">A</div> 机构用户
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="sidebar-group">
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h2v2H3V3zm6 0h2v2H9V3zm-3 0h2v2H6V3zm-3 5h2v2H3V8zm6 0h2v2H9V8zm-3 0h2v2H6V8zm-3 5h2v2H3v-2zm6 0h2v2H9v-2zm-3 0h2v2H6v-2z"/></svg>工作台</div>
+  </a>
+  <div class="sidebar-group">
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.5 2.5a.5.5 0 00-1 0v5.793L5.354 6.146a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 8.293V2.5z"/><path d="M3.5 9.5a.5.5 0 00-1 0v3A1.5 1.5 0 004 14h8a1.5 1.5 0 001.5-1.5v-3a.5.5 0 00-1 0v3a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5v-3z"/></svg>视频生成</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 1a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H1a1 1 0 01-1-1V1zm4 0v6h8V1H4zM3 8h2v2H3V8zm0 3h2v2H3v-2zm3-3h2v2H6V8zm0 3h2v2H6v-2zm3-3h2v2H9V8zm0 3h2v2H9v-2zm3-3h2v2h-2V8zm0 3h2v2h-2v-2z"/></svg>数字人管理</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 13A6 6 0 118 2a6 6 0 010 12z"/><path d="M8 4a.5.5 0 01.5.5v3.5h2a.5.5 0 010 1h-2.5a.5.5 0 01-.5-.5V4.5A.5.5 0 018 4z"/></svg>音频合成</div>
+    <div class="sidebar-item active"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.5 1a.5.5 0 00-.5.5v6.293L5.354 6.146a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 7.793V1.5a.5.5 0 00-.5-.5z"/><path d="M3.5 9a.5.5 0 00-.5.5v3A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5v-3a.5.5 0 00-1 0v3a.5.5 0 01-.5.5h-7a.5.5 0 01-.5-.5v-3a.5.5 0 00-.5-.5z"/></svg>字幕生成</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3a3 3 0 00-3 3v6a3 3 0 003 3h6a3 3 0 003-3V6a3 3 0 00-3-3H5zm1.5 2.5a.5.5 0 01.5-.5h2a.5.5 0 010 1H7a.5.5 0 01-.5-.5zM5 8a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5A.5.5 0 015 8zm.5 3a.5.5 0 000 1h3a.5.5 0 000-1h-3z"/></svg>数据审核</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 13A6 6 0 118 2a6 6 0 010 12zm-.5-7.5a.5.5 0 011 0v3a.5.5 0 01-1 0V6.5zm0-2.5a.5.5 0 011 0v1a.5.5 0 01-1 0V4z"/></svg>举报与反馈</div>
+  </a>
+</aside>
+
+<main class="main">
+  <div class="content">
+    <h1 class="page-title">字幕生成</h1>
+    <p class="page-desc">上传音频或输入文案，自动生成时间轴对齐的字幕文件</p>
+
+    <div class="panel" id="uploadPanel">
+      <div class="panel-title">📤 上传音频</div>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">点击或拖拽上传音频文件</div>
+        <div class="upload-hint">支持 MP3, WAV, AAC, M4A 格式 · 最大 500 MB</div>
+      </div>
+      <input type="file" id="fileInput" style="display:none" accept="audio/*" onchange="handleFile(this)">
+      <div class="file-info" id="fileInfo" style="display:none;">
+        <div class="file-icon">🎵</div>
+        <div class="file-detail">
+          <div class="file-name" id="fileName">audio_sample.wav</div>
+          <div class="file-meta" id="fileMeta">WAV · 48kHz · 立体声 · 24 MB</div>
+        </div>
+        <button class="file-remove" onclick="removeFile()">移除</button>
+      </div>
+    </div>
+
+    <div class="panel" id="textPanel">
+      <div class="panel-title">📝 或输入文案</div>
+      <textarea class="textarea" id="inputText" placeholder="输入讲解文案，系统将自动分句并生成时间轴...">各位观众大家好，欢迎来到青铜器展厅。现在为您讲解的是西周时期的青铜鼎。这件文物高32厘米，口径28厘米，鼎身纹饰精美，体现了当时高超的铸造工艺。三足鼎立的造型象征着稳固与威严，是西周礼器中的精品。</textarea>
+      <div style="text-align:right; margin-top:8px; font-size:12px; color:var(--text-secondary);">已输入 <span id="charCount">96</span> 字</div>
+    </div>
+
+    <div class="panel" id="configPanel">
+      <div class="panel-title">⚙️ 生成配置</div>
+      <div class="config-row">
+        <div class="config-item">
+          <div class="config-label">语言</div>
+          <select class="config-select" id="langSelect">
+            <option value="zh-CN" selected>中文 (简体)</option>
+            <option value="zh-TW">中文 (繁体)</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="config-item">
+          <div class="config-label">输出格式</div>
+          <select class="config-select" id="formatSelect">
+            <option value="srt" selected>SRT (标准)</option>
+            <option value="vtt">VTT (Web)</option>
+            <option value="ass">ASS (高级)</option>
+          </select>
+        </div>
+      </div>
+      <div class="config-row">
+        <div class="config-item">
+          <div class="config-label">字幕样式</div>
+          <select class="config-select" id="styleSelect">
+            <option value="default" selected>底部居中 (默认)</option>
+            <option value="top">顶部居中</option>
+            <option value="dual">双语上下</option>
+          </select>
+        </div>
+        <div class="config-item">
+          <div class="config-label">单句最大长度</div>
+          <select class="config-select" id="lengthSelect">
+            <option value="20">20 字</option>
+            <option value="30" selected>30 字</option>
+            <option value="40">40 字</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="generatePanel">
+      <div class="panel-title">🚀 生成字幕</div>
+      <button class="btn btn-primary" id="generateBtn" onclick="generateSubtitle()">📝 开始生成字幕</button>
+    </div>
+
+    <div class="panel progress-area" id="progressPanel">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">正在处理音频...</div>
+      <div class="progress-detail" id="progressDetail">语音识别中</div>
+    </div>
+
+    <div class="panel result-area" id="resultPanel">
+      <div class="panel-title">
+        <span>🎬 字幕预览</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm btn-secondary" onclick="editSubtitle()">✏️ 编辑</button>
+          <button class="btn btn-sm btn-primary" onclick="downloadSubtitle()">💾 下载</button>
+        </div>
+      </div>
+      <div class="subtitle-preview" id="subtitlePreview">
+        <div class="subtitle-entry">
+          <div class="subtitle-time">00:00:00,000 → 00:00:04,500</div>
+          <div class="subtitle-text">各位观众大家好，欢迎来到青铜器展厅。</div>
+        </div>
+        <div class="subtitle-entry">
+          <div class="subtitle-time">00:00:04,500 → 00:00:09,200</div>
+          <div class="subtitle-text">现在为您讲解的是西周时期的青铜鼎。</div>
+        </div>
+        <div class="subtitle-entry">
+          <div class="subtitle-time">00:00:09,200 → 00:00:16,800</div>
+          <div class="subtitle-text">这件文物高32厘米，口径28厘米，鼎身纹饰精美。</div>
+        </div>
+        <div class="subtitle-entry">
+          <div class="subtitle-time">00:00:16,800 → 00:00:22,100</div>
+          <div class="subtitle-text">体现了当时高超的铸造工艺。</div>
+        </div>
+        <div class="subtitle-entry">
+          <div class="subtitle-time">00:00:22,100 → 00:00:28,500</div>
+          <div class="subtitle-text">三足鼎立的造型象征着稳固与威严。</div>
+        </div>
+        <div class="subtitle-entry">
+          <div class="subtitle-time">00:00:28,500 → 00:00:31,200</div>
+          <div class="subtitle-text">是西周礼器中的精品。</div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+        <div style="font-size:13px; color:var(--text-secondary);">共 6 条字幕 · 总时长 00:31:200</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm btn-secondary" onclick="newSubtitle()">🔄 重新生成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function handleFile(input) {
+    const file = input.files[0];
+    if (file) {
+      document.getElementById('fileName').textContent = file.name;
+      const size = (file.size / 1024 / 1024).toFixed(1);
+      const ext = file.name.split('.').pop().toUpperCase();
+      document.getElementById('fileMeta').textContent = ext + ' · 48kHz · 立体声 · ' + size + ' MB';
+      document.getElementById('fileInfo').style.display = 'flex';
+      document.getElementById('uploadArea').style.display = 'none';
+    }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      document.getElementById('fileName').textContent = file.name;
+      const size = (file.size / 1024 / 1024).toFixed(1);
+      const ext = file.name.split('.').pop().toUpperCase();
+      document.getElementById('fileMeta').textContent = ext + ' · 48kHz · 立体声 · ' + size + ' MB';
+      document.getElementById('fileInfo').style.display = 'flex';
+      document.getElementById('uploadArea').style.display = 'none';
+    }
+  }
+
+  function removeFile() {
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('uploadArea').style.display = 'block';
+    document.getElementById('fileInput').value = '';
+  }
+
+  function generateSubtitle() {
+    document.getElementById('generateBtn').disabled = true;
+    document.getElementById('generateBtn').textContent = '⏳ 生成中...';
+    document.getElementById('progressPanel').classList.add('active');
+    document.getElementById('generatePanel').style.display = 'none';
+
+    const fill = document.getElementById('progressFill');
+    const text = document.getElementById('progressText');
+    const detail = document.getElementById('progressDetail');
+    const steps = [
+      { pct: 15, text: '正在处理音频...', detail: '语音预处理' },
+      { pct: 35, text: '语音识别中...', detail: 'ASR 模型推理' },
+      { pct: 55, text: '语义分析中...', detail: '自然语言分句' },
+      { pct: 70, text: '时间轴对齐...', detail: '音字对齐算法' },
+      { pct: 85, text: '格式化输出...', detail: 'SRT 编码生成' },
+      { pct: 100, text: '生成完成！', detail: '字幕文件已就绪' }
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step < steps.length) {
+        fill.style.width = steps[step].pct + '%';
+        text.textContent = steps[step].text;
+        detail.textContent = steps[step].detail;
+        step++;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => {
+          document.getElementById('progressPanel').classList.remove('active');
+          document.getElementById('resultPanel').classList.add('active');
+        }, 600);
+      }
+    }, 400);
+  }
+
+  function editSubtitle() {
+    alert('字幕编辑器已打开。您可以修改时间轴和字幕文本。');
+  }
+
+  function downloadSubtitle() {
+    const format = document.getElementById('formatSelect').value;
+    const ext = format.toUpperCase();
+    alert('📥 开始下载字幕文件：WB-20250708-006.' + format + ' (' + ext + ' 格式)');
+  }
+
+  function newSubtitle() {
+    document.getElementById('generatePanel').style.display = 'block';
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateBtn').textContent = '📝 开始生成字幕';
+    document.getElementById('resultPanel').classList.remove('active');
+  }
+
+  document.getElementById('inputText').addEventListener('input', function() {
+    document.getElementById('charCount').textContent = this.value.length;
+  });
+</script>
+
+</body>
+</html>

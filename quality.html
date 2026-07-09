@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文博AI宣传视频平台 - 质量评价</title>
+  <style>
+    :root {
+      --bg-deep: #0d1117; --bg-card: #161b22; --bg-hover: #21262d; --border: #30363d;
+      --text-primary: #c9d1d9; --text-secondary: #8b949e; --accent: #2f81f7; --accent-hover: #58a6ff;
+      --green: #238636; --green-text: #3fb950; --red: #da3633; --yellow: #9e8c00; --yellow-text: #d29922;
+      --tag-bg: rgba(47,129,247,0.15); --sidebar-active: rgba(47,129,247,0.12);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,"Noto Sans SC",sans-serif; background:var(--bg-deep); color:var(--text-primary); font-size:14px; }
+    a { text-decoration:none; color:inherit; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:56px; background:var(--bg-card); border-bottom:1px solid var(--border); position:fixed; top:0; left:0; right:0; z-index:100; }
+    .topbar-left { display:flex; align-items:center; gap:32px; }
+    .logo { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:600; }
+    .logo-icon { width:28px; height:28px; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+    .topnav { display:flex; gap:28px; }
+    .topnav a { font-size:14px; color:var(--text-secondary); padding:18px 0; border-bottom:2px solid transparent; transition:.2s; }
+    .topnav a:hover, .topnav a.active { color:var(--text-primary); border-bottom-color:var(--accent); }
+    .topbar-right { display:flex; align-items:center; gap:12px; color:var(--text-secondary); font-size:13px; }
+    .user-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:12px; }
+
+    .sidebar { position:fixed; top:56px; left:0; width:210px; height:calc(100vh - 56px); background:var(--bg-card); border-right:1px solid var(--border); overflow-y:auto; z-index:90; }
+    .sidebar-group { padding:12px 0; border-bottom:1px solid var(--border); }
+    .sidebar-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:13px; color:var(--text-secondary); cursor:pointer; transition:.15s; }
+    .sidebar-item:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .sidebar-item.active { background:var(--sidebar-active); color:var(--accent-hover); border-left:3px solid var(--accent); padding-left:17px; }
+    .sidebar-item svg { width:16px; height:16px; flex-shrink:0; }
+
+    .main { margin-left:210px; margin-top:56px; padding:24px; min-height:calc(100vh - 56px); }
+    .content { max-width:1100px; margin:0 auto; }
+
+    .page-title { font-size:22px; font-weight:600; margin-bottom:4px; }
+    .page-desc { color:var(--text-secondary); font-size:13px; margin-bottom:24px; }
+
+    .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:20px; }
+    .panel-title { font-size:16px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
+
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; border:none; transition:.15s; font-weight:500; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-primary:hover { background:var(--accent-hover); }
+    .btn-secondary { background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border); }
+    .btn-sm { padding:5px 12px; font-size:12px; }
+
+    .score-cards { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:20px; }
+    .score-card { background:var(--bg-hover); border-radius:10px; padding:20px; text-align:center; border:2px solid transparent; transition:.2s; }
+    .score-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .score-value { font-size:32px; font-weight:700; margin-bottom:4px; }
+    .score-value.excellent { color:var(--green-text); }
+    .score-value.good { color:var(--accent-hover); }
+    .score-value.avg { color:var(--yellow-text); }
+    .score-value.poor { color:var(--red); }
+    .score-label { font-size:13px; color:var(--text-secondary); }
+    .score-detail { font-size:11px; color:var(--text-secondary); margin-top:4px; }
+
+    .chart-area { background:var(--bg-deep); border-radius:10px; padding:20px; height:280px; position:relative; overflow:hidden; }
+    .chart-canvas { width:100%; height:100%; }
+
+    .detail-table { width:100%; border-collapse:collapse; }
+    .detail-table th { text-align:left; padding:12px 16px; font-size:12px; color:var(--text-secondary); font-weight:500; border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.5px; }
+    .detail-table td { padding:14px 16px; font-size:13px; border-bottom:1px solid var(--border); }
+    .detail-table tr:hover { background:var(--bg-hover); }
+    .detail-table tr:last-child td { border-bottom:none; }
+    .bar-track { width:100%; max-width:200px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:3px; transition:width 0.5s; }
+    .bar-fill.green { background:var(--green); }
+    .bar-fill.blue { background:var(--accent); }
+    .bar-fill.yellow { background:var(--yellow-text); }
+    .bar-fill.red { background:var(--red); }
+    .score-badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:500; }
+    .badge-green { background:rgba(35,134,54,0.15); color:var(--green-text); }
+    .badge-blue { background:var(--tag-bg); color:var(--accent-hover); }
+    .badge-yellow { background:rgba(217,165,20,0.15); color:var(--yellow-text); }
+    .badge-red { background:rgba(218,54,51,0.15); color:var(--red); }
+
+    .report-card { background:var(--bg-hover); border-radius:10px; padding:20px; }
+    .report-title { font-size:14px; font-weight:600; margin-bottom:12px; }
+    .report-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+    .report-item:last-child { border-bottom:none; }
+    .report-item .label { color:var(--text-secondary); }
+    .report-item .value { font-weight:500; }
+    .report-item .value.green { color:var(--green-text); }
+    .report-item .value.yellow { color:var(--yellow-text); }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">
+      <div class="logo-icon">🏛</div>
+      文博AI宣传视频平台
+    </div>
+    <nav class="topnav">
+      <a href="index.html">首页</a>
+      <a href="video.html">视频生成</a>
+      <a href="audit.html">数据审核</a>
+      <a href="avatar.html">数字人管理</a>
+      <a href="audio.html">音频合成</a>
+      <a href="subtitle.html">字幕生成</a>
+      <a href="quality.html" class="active">质量评价</a>
+      <a href="report.html">举报反馈</a>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <div class="user-avatar">A</div> 机构用户
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="sidebar-group">
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h2v2H3V3zm6 0h2v2H9V3zm-3 0h2v2H6V3zm-3 5h2v2H3V8zm6 0h2v2H9V8zm-3 0h2v2H6V8zm-3 5h2v2H3v-2zm6 0h2v2H9v-2zm-3 0h2v2H6v-2z"/></svg>工作台</div>
+  </a>
+  <div class="sidebar-group">
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.5 2.5a.5.5 0 00-1 0v5.793L5.354 6.146a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 8.293V2.5z"/><path d="M3.5 9.5a.5.5 0 00-1 0v3A1.5 1.5 0 004 14h8a1.5 1.5 0 001.5-1.5v-3a.5.5 0 00-1 0v3a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5v-3z"/></svg>视频生成</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 1a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H1a1 1 0 01-1-1V1zm4 0v6h8V1H4zM3 8h2v2H3V8zm0 3h2v2H3v-2zm3-3h2v2H6V8zm0 3h2v2H6v-2zm3-3h2v2H9V8zm0 3h2v2H9v-2zm3-3h2v2h-2V8zm0 3h2v2h-2v-2z"/></svg>数字人管理</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 13A6 6 0 118 2a6 6 0 010 12z"/><path d="M8 4a.5.5 0 01.5.5v3.5h2a.5.5 0 010 1h-2.5a.5.5 0 01-.5-.5V4.5A.5.5 0 018 4z"/></svg>音频合成</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.5 1a.5.5 0 00-.5.5v6.293L5.354 6.146a.5.5 0 10-.708.708l3 3a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 7.793V1.5a.5.5 0 00-.5-.5z"/><path d="M3.5 9a.5.5 0 00-.5.5v3A1.5 1.5 0 004.5 14h7a1.5 1.5 0 001.5-1.5v-3a.5.5 0 00-1 0v3a.5.5 0 01-.5.5h-7a.5.5 0 01-.5-.5v-3a.5.5 0 00-.5-.5z"/></svg>字幕生成</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3a3 3 0 00-3 3v6a3 3 0 003 3h6a3 3 0 003-3V6a3 3 0 00-3-3H5zm1.5 2.5a.5.5 0 01.5-.5h2a.5.5 0 010 1H7a.5.5 0 01-.5-.5zM5 8a.5.5 0 01.5-.5h5a.5.5 0 010 1h-5A.5.5 0 015 8zm.5 3a.5.5 0 000 1h3a.5.5 0 000-1h-3z"/></svg>数据审核</div>
+    <a href="#" class="sidebar-item"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 13A6 6 0 118 2a6 6 0 010 12zm-.5-7.5a.5.5 0 011 0v3a.5.5 0 01-1 0V6.5zm0-2.5a.5.5 0 011 0v1a.5.5 0 01-1 0V4z"/></svg>举报与反馈</div>
+  </a>
+</aside>
+
+<main class="main">
+  <div class="content">
+    <h1 class="page-title">质量评价</h1>
+    <p class="page-desc">对AI生成的视频、音频、字幕进行多维度质量评分与可视化分析</p>
+
+    <div class="panel">
+      <div class="panel-title">📊 综合质量评分 - WB-20250708-006</div>
+      <div class="score-cards">
+        <div class="score-card">
+          <div class="score-value excellent" id="scoreOverall">92</div>
+          <div class="score-label">综合评分</div>
+          <div class="score-detail">优秀</div>
+        </div>
+        <div class="score-card">
+          <div class="score-value good" id="scoreVisual">87</div>
+          <div class="score-label">画面质量</div>
+          <div class="score-detail">渲染精细 · 色彩准确</div>
+        </div>
+        <div class="score-card">
+          <div class="score-value excellent" id="scoreAudio">95</div>
+          <div class="score-label">音频质量</div>
+          <div class="score-detail">发音清晰 · 自然流畅</div>
+        </div>
+        <div class="score-card">
+          <div class="score-value good" id="scoreSync">88</div>
+          <div class="score-label">同步精度</div>
+          <div class="score-detail">唇形对齐 · 时间准确</div>
+        </div>
+      </div>
+      <div class="chart-area">
+        <canvas id="radarChart" class="chart-canvas"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">📋 详细评分</div>
+      <table class="detail-table">
+        <thead>
+          <tr><th>评价维度</th><th>分数</th><th>可视化</th><th>等级</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>画面清晰度</td><td>88/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:88%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
+          <tr><td>数字人渲染质量</td><td>90/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:90%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
+          <tr><td>文物还原准确度</td><td>94/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:94%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
+          <tr><td>语音自然度</td><td>96/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:96%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
+          <tr><td>唇形同步精度</td><td>89/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:89%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
+          <tr><td>字幕时间对齐</td><td>91/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:91%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
+          <tr><td>内容历史准确性</td><td>85/100</td><td><div class="bar-track"><div class="bar-fill blue" style="width:85%"></div></div></td><td><span class="score-badge badge-blue">良好</span></td></tr>
+          <tr><td>叙事流畅度</td><td>93/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:93%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
+          <tr><td>背景画面质量</td><td>82/100</td><td><div class="bar-track"><div class="bar-fill yellow" style="width:82%"></div></div></td><td><span class="score-badge badge-yellow">一般</span></td></tr>
+          <tr><td>水印标识合规</td><td>100/100</td><td><div class="bar-track"><div class="bar-fill green" style="width:100%"></div></div></td><td><span class="score-badge badge-green">优秀</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div class="report-card">
+        <div class="report-title">✅ 优势项</div>
+        <div class="report-item"><span class="label">语音自然度</span><span class="value green">96/100</span></div>
+        <div class="report-item"><span class="label">水印合规</span><span class="value green">100/100</span></div>
+        <div class="report-item"><span class="label">文物还原准确度</span><span class="value green">94/100</span></div>
+        <div class="report-item"><span class="label">叙事流畅度</span><span class="value green">93/100</span></div>
+      </div>
+      <div class="report-card">
+        <div class="report-title">⚠️ 待优化项</div>
+        <div class="report-item"><span class="label">背景画面质量</span><span class="value yellow">82/100</span></div>
+        <div class="report-item"><span class="label">画面清晰度</span><span class="value green">88/100</span></div>
+        <div class="report-item"><span class="label">内容历史准确性</span><span class="value green">85/100</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function drawRadar() {
+    const canvas = document.getElementById('radarChart');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const w = rect.width, h = rect.height;
+    const cx = w / 2, cy = h / 2;
+    const radius = Math.min(w, h) * 0.35;
+    const labels = ['画面质量', '音频质量', '同步精度', '内容准确', '字幕对齐', '叙事流畅'];
+    const values = [87, 95, 88, 85, 91, 93];
+    const n = labels.length;
+    
+    ctx.clearRect(0, 0, w, h);
+    
+    ctx.strokeStyle = '#30363d';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 5; i++) {
+      ctx.beginPath();
+      for (let j = 0; j <= n; j++) {
+        const angle = (Math.PI * 2 * j / n) - Math.PI / 2;
+        const r = radius * (i / 5);
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    }
+    
+    for (let i = 0; i < n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
+      ctx.stroke();
+      
+      const lx = cx + Math.cos(angle) * (radius + 28);
+      const ly = cy + Math.sin(angle) * (radius + 28);
+      ctx.fillStyle = '#8b949e';
+      ctx.font = '13px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(labels[i], lx, ly);
+    }
+    
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const angle = (Math.PI * 2 * (i % n) / n) - Math.PI / 2;
+      const r = radius * (values[i % n] / 100);
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.fillStyle = 'rgba(47,129,247,0.2)';
+    ctx.fill();
+    ctx.strokeStyle = '#2f81f7';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    for (let i = 0; i < n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      const r = radius * (values[i] / 100);
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#2f81f7';
+      ctx.fill();
+      ctx.strokeStyle = '#0d1117';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+  
+  drawRadar();
+  window.addEventListener('resize', drawRadar);
+  
+  setTimeout(() => {
+    const scores = { scoreOverall: 92, scoreVisual: 87, scoreAudio: 95, scoreSync: 88 };
+    Object.entries(scores).forEach(([id, target]) => {
+      const el = document.getElementById(id);
+      let current = 0;
+      const step = () => {
+        current += 2;
+        if (current > target) current = target;
+        el.textContent = current;
+        if (current < target) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }, 300);
+</script>
+
+</body>
+</html>
