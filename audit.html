@@ -221,12 +221,11 @@
               <option value="展览预告">展览预告</option>
               <option value="历史故事">历史故事</option>
             </select>
-            <select class="filter-select" id="filterDate" onchange="applyFilter()">
-              <option value="all">全部日期</option>
-              <option value="today">今天</option>
-              <option value="week">近7天</option>
-              <option value="month">近30天</option>
-            </select>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="date" class="filter-select" id="dateFrom" value="2025-06-01" onchange="applyFilter()" style="font-family:inherit; min-width:130px;">
+              <span style="color:var(--text-secondary); font-size:13px;">至</span>
+              <input type="date" class="filter-select" id="dateTo" value="2025-07-09" onchange="applyFilter()" style="font-family:inherit; min-width:130px;">
+            </div>
           </div>
           <table class="table">
             <thead>
@@ -483,7 +482,8 @@
   function applyFilter() {
     const status = document.getElementById('filterStatus').value;
     const type = document.getElementById('filterType').value;
-    const date = document.getElementById('filterDate').value;
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
     const rows = document.querySelectorAll('#auditTable tr');
 
     rows.forEach(row => {
@@ -494,11 +494,8 @@
       let show = true;
       if (status !== 'all' && rowStatus !== status) show = false;
       if (type !== 'all' && rowType !== type) show = false;
-      if (date !== 'all') {
-        if (date === 'today' && rowDate !== '2025-07-08' && rowDate !== '2025-07-09') show = false;
-        if (date === 'week' && (rowDate < '2025-07-01' || rowDate > '2025-07-09')) show = false;
-        if (date === 'month' && (rowDate < '2025-06-09' || rowDate > '2025-07-09')) show = false;
-      }
+      if (dateFrom && rowDate < dateFrom) show = false;
+      if (dateTo && rowDate > dateTo) show = false;
       row.classList.toggle('hidden', !show);
     });
   }
